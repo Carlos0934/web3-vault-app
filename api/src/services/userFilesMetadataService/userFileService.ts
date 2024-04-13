@@ -20,11 +20,11 @@ export class UserFilesMetadataService {
       key: web3.utils.hexToAscii(file.key),
       checksum: file.checksum,
       name: file.name,
-      size: file.size,
+      size: new Number(file.size),
       userId: web3.utils.hexToAscii(file.userId),
-      timestamp: file.timestamp,
+      timestamp: new Number(file.timestamp),
     }));
-
+    console.log(filesMetadata);
     return filesMetadata;
   }
 
