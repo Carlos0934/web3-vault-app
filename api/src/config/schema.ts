@@ -14,5 +14,6 @@ export const userTransactionFiles = sqliteTable("user_transactions", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   transactionHash: text("transaction_hash").notNull(),
+  blockHash: text("block_hash").notNull(),
   createdAt: integer("created_at").notNull(),
 });
