@@ -5,35 +5,55 @@ export const fileMetadataRegistryAbi = [
     type: "constructor",
   },
   {
-    anonymous: false,
     inputs: [
       {
-        indexed: false,
-        internalType: "bytes32",
-        name: "name",
-        type: "bytes32",
-      },
-      {
-        indexed: true,
-        internalType: "bytes32",
-        name: "checksum",
-        type: "bytes32",
-      },
-      {
-        indexed: true,
         internalType: "bytes32",
         name: "userId",
         type: "bytes32",
       },
+    ],
+    name: "getFilesByUser",
+    outputs: [
       {
-        indexed: false,
-        internalType: "uint64",
-        name: "timestamp",
-        type: "uint64",
+        components: [
+          {
+            internalType: "bytes32",
+            name: "key",
+            type: "bytes32",
+          },
+          {
+            internalType: "string",
+            name: "checksum",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "name",
+            type: "string",
+          },
+          {
+            internalType: "uint256",
+            name: "size",
+            type: "uint256",
+          },
+          {
+            internalType: "bytes32",
+            name: "userId",
+            type: "bytes32",
+          },
+          {
+            internalType: "uint256",
+            name: "timestamp",
+            type: "uint256",
+          },
+        ],
+        internalType: "struct FileMetadataRegistry.FileMetadata[]",
+        name: "",
+        type: "tuple[]",
       },
     ],
-    name: "Register",
-    type: "event",
+    stateMutability: "view",
+    type: "function",
   },
   {
     inputs: [],
@@ -52,13 +72,23 @@ export const fileMetadataRegistryAbi = [
     inputs: [
       {
         internalType: "bytes32",
-        name: "name",
+        name: "key",
         type: "bytes32",
       },
       {
-        internalType: "bytes32",
+        internalType: "string",
         name: "checksum",
-        type: "bytes32",
+        type: "string",
+      },
+      {
+        internalType: "string",
+        name: "name",
+        type: "string",
+      },
+      {
+        internalType: "uint256",
+        name: "size",
+        type: "uint256",
       },
       {
         internalType: "bytes32",
@@ -66,9 +96,58 @@ export const fileMetadataRegistryAbi = [
         type: "bytes32",
       },
     ],
-    name: "register",
+    name: "registerFile",
     outputs: [],
     stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "",
+        type: "bytes32",
+      },
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    name: "userFiles",
+    outputs: [
+      {
+        internalType: "bytes32",
+        name: "key",
+        type: "bytes32",
+      },
+      {
+        internalType: "string",
+        name: "checksum",
+        type: "string",
+      },
+      {
+        internalType: "string",
+        name: "name",
+        type: "string",
+      },
+      {
+        internalType: "uint256",
+        name: "size",
+        type: "uint256",
+      },
+      {
+        internalType: "bytes32",
+        name: "userId",
+        type: "bytes32",
+      },
+      {
+        internalType: "uint256",
+        name: "timestamp",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
     type: "function",
   },
 ] as const;

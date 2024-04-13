@@ -8,7 +8,7 @@
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",
-    "deploy": "hardhat ignition deploy ./ignition/modules/FileMetadataRegistry.ts"
+    "deploy": "hardhat ignition deploy ./ignition/modules/FileMetadataRegistry.ts --network  testnet-shimmer"
   },
   "dependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",

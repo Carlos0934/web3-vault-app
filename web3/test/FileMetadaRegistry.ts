@@ -31,16 +31,20 @@ describe("FileMetadataRegistry", function () {
         deployFileMetadataRegistryFixture
       );
 
-      const fileChecksum = ethers.encodeBytes32String("0x123");
+      const fileChecksum = "0x1234567890abcdefffff";
+      const fileName = "file.txt";
       const userId = ethers.encodeBytes32String("0x456");
-      const filename = ethers.encodeBytes32String("file.txt");
+      const size = 100;
+      const key = ethers.encodeBytes32String("storageKey");
 
       const tx = await fileMetadataRegistry
         .connect(owner)
-        .register(fileChecksum, userId, filename);
-
+        .registerFile(key, fileChecksum, fileName, size, userId);
       await tx.wait();
-      await expect(tx).to.emit(fileMetadataRegistry, "Register");
+
+      const metadata = await fileMetadataRegistry.getFilesByUser(userId);
+      expect(metadata.length).to.equal(1);
+      expect(metadata[0].checksum).to.equal(fileChecksum);
     });
   });
 });

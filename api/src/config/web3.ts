@@ -10,7 +10,7 @@ const account = web3.eth.accountProvider?.privateKeyToAccount(
 );
 
 web3.eth.defaultAccount = account?.address;
-
+web3.eth.accounts.wallet.add(account!);
 const fileMetadataRegistryContract = new web3.eth.Contract(
   fileMetadataRegistryAbi,
   secrets.fileMetadataRegistryContractAddress
