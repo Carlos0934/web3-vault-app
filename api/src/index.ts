@@ -1,6 +1,6 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
-import { factoryCreateClass } from "./utils/factory";
+
 import authRoutes from "./routes/auth";
 
 const app = new Hono();
