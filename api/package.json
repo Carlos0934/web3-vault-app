@@ -1,0 +1,25 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsx --env-file=.env --watch src/index.ts",
+    "generate": "drizzle-kit generate:sqlite",
+    "migrate": "drizzle-kit push:sqlite"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "drizzle-kit": "^0.20.14",
+    "tsx": "^4.7.2"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.10.0",
+    "@libsql/client": "^0.6.0",
+    "drizzle-orm": "^0.30.8",
+    "hono": "^4.2.3"
+  }
+}
