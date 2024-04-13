@@ -1,14 +1,30 @@
 import { fileMetadataRegistryContract, web3 } from "../../config/web3";
+import { UserTransactionFileRepository } from "../../repositories/userTransactionFilesRepository";
 
 export class UserFilesMetadataService {
-  constructor() {}
+  constructor(
+    private readonly userTransactionFilesRepository: UserTransactionFileRepository
+  ) {}
 
   async findFilesMetadataByUserId(userId: string) {
+    const firstTransaction =
+      await this.userTransactionFilesRepository.findFirstByUserId(userId);
+    const lastTransaction =
+      await this.userTransactionFilesRepository.findLastByUserId(userId);
+
+    if (!firstTransaction || !lastTransaction) {
+      return [];
+    }
+
     const bytesUserIdHashed = web3.utils.asciiToHex(userId);
     const events = await fileMetadataRegistryContract.getPastEvents(
       "Register",
       {
-        filter: { userId: bytesUserIdHashed },
+        filter: {
+          userId: bytesUserIdHashed,
+          fromBlock: firstTransaction.blockNumber,
+          toBlock: lastTransaction.blockNumber,
+        },
       }
     );
     const filesMetadata = events.map((event) => {
@@ -29,21 +45,57 @@ export class UserFilesMetadataService {
     return filesMetadata;
   }
 
-  async registerFileMetadata(
-    name: string,
-    checksum: string,
-    userId: string,
-    timestamp: number
-  ) {
-    const bytesName = web3.utils.asciiToHex(name);
-    const bytesChecksum = web3.utils.asciiToHex(checksum);
-    const bytesUserId = web3.utils.asciiToHex(userId);
-    const bytesTimestamp = web3.utils.numberToHex(timestamp);
+  async registerFileMetadata(file: File, userId: string) {
+    const { blockHash, transactionHash, blockNumber } =
+      await this.saveFileMetadata(file.name, userId, file);
+    await this.saveTransactionFile({
+      userId,
+      transactionHash,
+      blockHash,
+      blockNumber,
+    });
+  }
 
+  private async getChecksum(file: Blob) {
+    const buffer = await file.arrayBuffer();
+    const bytes = new Uint8Array(buffer);
+    const checksum = await crypto.subtle.digest("SHA-512", bytes);
+    return web3.utils.bytesToHex(new Uint8Array(checksum));
+  }
+
+  private async saveTransactionFile(data: {
+    userId: string;
+    transactionHash: string;
+    blockHash: string;
+    blockNumber: bigint;
+  }) {
+    await this.userTransactionFilesRepository.create(data);
+  }
+
+  private async saveFileMetadata(fileName: string, userId: string, file: Blob) {
+    const checksum = await this.getChecksum(file);
+    const bytesName = web3.utils.asciiToHex(await this.sha256(fileName));
+    const bytesUserId = web3.utils.asciiToHex(await this.sha256(userId));
+    console.log("bytesName", bytesName);
+    console.log("bytesUserId", bytesUserId);
+    console.log("checksum", checksum);
     const receipt = await fileMetadataRegistryContract.methods
-      .register(bytesName, bytesChecksum, bytesUserId, bytesTimestamp)
+      .register(bytesName, checksum, bytesUserId)
       .send({ from: web3.eth.defaultAccount });
 
-    return receipt;
+    return {
+      transactionHash: receipt.transactionHash,
+      blockHash: receipt.blockHash,
+      blockNumber: receipt.blockNumber,
+    };
+  }
+
+  private sha256(string: string) {
+    const buffer = new TextEncoder().encode(string);
+    return crypto.subtle.digest("SHA-256", buffer).then((hash) => {
+      return Array.from(new Uint8Array(hash))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+    });
   }
 }

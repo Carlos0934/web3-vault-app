@@ -19,7 +19,7 @@ const config = {
     return new FileService(secrets.encryptionKey, "files");
   },
   [UserFilesMetadataService.name]: () => {
-    return new UserFilesMetadataService();
+    return new UserFilesMetadataService(new UserTransactionFileRepository(db));
   },
   [UserTransactionFileRepository.name]: () => {
     return new UserTransactionFileRepository(db);

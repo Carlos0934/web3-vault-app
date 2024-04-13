@@ -31,12 +31,14 @@ export class UserTransactionFileRepository {
     userId: string;
     transactionHash: string;
     blockHash: string;
+    blockNumber: bigint;
   }): Promise<{ id: string }> {
     const id = crypto.randomUUID();
 
     await this.db.insert(userTransactionFiles).values({
       id,
       ...data,
+      blockNumber: BigInt(data.blockNumber),
       createdAt: Date.now(),
     });
 

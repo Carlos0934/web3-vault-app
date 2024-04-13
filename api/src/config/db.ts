@@ -1,5 +1,6 @@
 import { drizzle } from "drizzle-orm/libsql";
 import { createClient } from "@libsql/client";
+import { schema } from "./schema";
 
 const DATABASE_URL = process.env.DATABASE_URL!;
 const DATABASE_AUTH_TOKEN = process.env.DATABASE_AUTH_TOKEN!;
@@ -13,6 +14,6 @@ const client = createClient({
   authToken: DATABASE_AUTH_TOKEN,
 });
 
-const db = drizzle(client);
+const db = drizzle(client, { schema });
 
 export default db;
