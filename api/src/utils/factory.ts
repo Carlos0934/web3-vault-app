@@ -1,10 +1,11 @@
 import db from "../config/db";
+import { secrets } from "../config/secrets";
 import { UserRepository } from "../repositories/user.repository";
 import { AuthService } from "../services/authService";
 
 const config = {
   [AuthService.name]: () => {
-    return new AuthService(new UserRepository(db), "secret");
+    return new AuthService(new UserRepository(db), secrets.jwtSecret);
   },
 
   [UserRepository.name]: () => {

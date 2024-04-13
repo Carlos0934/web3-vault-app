@@ -6,7 +6,7 @@ import {
   RegisterUserInput,
   RegisterUserOutput,
 } from "./types";
-import jwt from "hono/jwt";
+import * as jwt from "hono/jwt";
 import bcrypt from "bcrypt";
 
 export class AuthService {
