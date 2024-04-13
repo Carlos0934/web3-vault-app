@@ -1,14 +1,14 @@
 import { Hono } from "hono";
 import { jwt } from "hono/jwt";
 import { zValidator } from "@hono/zod-validator";
-import { factoryCreateClass } from "../utils/factory";
-import { AuthService } from "../services/authService";
+import { factoryCreateClass } from "../../utils/factory";
+import { AuthService } from "../../services/authService";
 import {
   LoginUserInputSchema,
   RegisterUserInputSchema,
-} from "../services/authService/schemas";
-import { secrets } from "../config/secrets";
-import { JwtPayload } from "../services/authService/types";
+} from "../../services/authService/schemas";
+import { secrets } from "../../config/secrets";
+import { JwtPayload } from "../../services/authService/types";
 
 const authService = factoryCreateClass(AuthService);
 
@@ -25,7 +25,7 @@ authRoutes.post(
       return ctx.json(result);
     } catch (error) {
       if (error instanceof Error) {
-        return ctx.json({ error: error.message }, 400);
+        return ctx.json({ error: error.message }, 401);
       }
     }
   }

@@ -1,4 +1,5 @@
-import type {
+import { z } from "zod";
+import {
   LoginUserInputSchema,
   RegisterUserInputSchema,
   UserProfileSchema,

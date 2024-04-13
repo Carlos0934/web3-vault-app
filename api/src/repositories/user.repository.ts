@@ -71,4 +71,8 @@ export class UserRepository {
       password: user.password,
     };
   }
+
+  async deleteById(id: string): Promise<void> {
+    await this.db.delete(users).where(eq(users.id, id));
+  }
 }
