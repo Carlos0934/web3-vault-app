@@ -1,5 +1,5 @@
 import { drizzle } from "drizzle-orm/libsql";
-import { createClient } from "@libsql/client";
+import { createClient } from "@libsql/client/web";
 import { schema } from "./schema";
 
 const DATABASE_URL = process.env.DATABASE_URL!;
