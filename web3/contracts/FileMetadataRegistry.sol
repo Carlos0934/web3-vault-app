@@ -43,18 +43,44 @@ contract FileMetadataRegistry {
         return userFiles[userId];
     }
 
-    function deleteUserFileAt(bytes32 userId, uint256 index) public onlyOwner {
-        require(index < userFiles[userId].length, "Index out of bounds");
+    function getFileByKey(
+        bytes32 userId,
+        string memory key
+    ) public view returns (FileMetadata memory) {
+        for (uint256 i = 0; i < userFiles[userId].length; i++) {
+            if (
+                keccak256(abi.encodePacked(userFiles[userId][i].key)) ==
+                keccak256(abi.encodePacked(key))
+            ) {
+                return userFiles[userId][i];
+            }
+        }
+
+        revert("File not found");
+    }
+
+    function deleteUserFileByKey(
+        bytes32 userId,
+        string memory key
+    ) public onlyOwner {
+        uint256 index = 0;
+
+        for (uint256 i = 0; i < userFiles[userId].length; i++) {
+            if (
+                keccak256(abi.encodePacked(userFiles[userId][i].key)) ==
+                keccak256(abi.encodePacked(key))
+            ) {
+                index = i;
+                break;
+            }
+        }
+
         // Shift elements to the left to fill the gap at index
         for (uint256 i = index; i < userFiles[userId].length - 1; i++) {
             userFiles[userId][i] = userFiles[userId][i + 1];
         }
 
         userFiles[userId].pop();
-    }
-
-    function deleteAllUserFiles(bytes32 userId) public onlyOwner {
-        delete userFiles[userId];
     }
 
     modifier onlyOwner() {

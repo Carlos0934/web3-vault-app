@@ -59,7 +59,8 @@ filesRoutes.post(
     const filename = file.name;
     const size = file.size;
     const checksum = await getChecksum(file);
-    const key = await fileService.uploadFile(file);
+    //const key = await fileService.uploadFile(file);
+    const key = crypto.randomUUID();
     await userFilesMetadataService.registerFileMetadata({
       checksum,
       key,
@@ -68,6 +69,22 @@ filesRoutes.post(
     });
 
     return c.json({ message: "File registered" }, 201);
+  }
+);
+
+filesRoutes.delete(
+  "/:key",
+  jwt({
+    secret: secrets.jwtSecret,
+  }),
+  async (c) => {
+    const { userId } = c.get("jwtPayload") as JwtPayload;
+    const key = c.req.param("key");
+
+    //await fileService.deleteFile(key);
+    await userFilesMetadataService.deleteFileMetadata(userId, key);
+
+    return c.json({ message: "File deleted" });
   }
 );
 export default filesRoutes;

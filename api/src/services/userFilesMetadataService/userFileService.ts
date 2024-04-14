@@ -13,7 +13,7 @@ export class UserFilesMetadataService {
   ) {}
 
   async findFilesMetadataByUserId(userId: string) {
-    const bytesUserIdHashed = await hashHex(userId, "SHA-256");
+    const bytesUserIdHashed = await this.hashUserId(userId);
 
     const files = await fileMetadataRegistryContract.methods
       .getFilesByUser(bytesUserIdHashed)
@@ -27,26 +27,16 @@ export class UserFilesMetadataService {
   }
 
   async findFileMetadataByUserIdAndKey(userId: string, key: string) {
-    const bytesUserIdHashed = this.hashUserId(userId);
+    const bytesUserIdHashed = await this.hashUserId(userId);
+    const encryptedKey = web3.utils.bytesToHex(
+      await encrypt(stringToUint8Array(key), this.encryptionKey)
+    );
 
-    const files = await fileMetadataRegistryContract.methods
-      .getFilesByUser(bytesUserIdHashed, key)
+    const file = await fileMetadataRegistryContract.methods
+      .getFileByKey(bytesUserIdHashed, encryptedKey)
       .call();
 
-    if (!files || files.length === 0) {
-      throw new Error("File not found");
-    }
-
-    const decryptedKey = this.textDecoder.decode(
-      await decrypt(web3.utils.hexToBytes(files[0].key), this.encryptionKey)
-    );
-    const index = files.findIndex((file: any) => decryptedKey === file.key);
-
-    if (index === -1) {
-      throw new Error("File not found");
-    }
-
-    const fileMetadata = await this.parseFileMetadata(files[index]);
+    const fileMetadata = await this.parseFileMetadata(file);
 
     return fileMetadata;
   }
@@ -64,17 +54,13 @@ export class UserFilesMetadataService {
     }
 
     const size = file.size;
-    const hashedUserId = this.hashUserId(userId);
+    const hashedUserId = await this.hashUserId(userId);
 
     // Encrypt key and filename before storing in the contract to protect user privacy and data
 
-    const bytesKey = web3.utils.bytesToHex(
-      await encrypt(stringToUint8Array(key), this.encryptionKey)
-    );
+    const bytesKey = await this.createEncryptedHex(key);
 
-    const bytesFilename = web3.utils.bytesToHex(
-      await encrypt(stringToUint8Array(file.name), this.encryptionKey)
-    );
+    const bytesFilename = await this.createEncryptedHex(file.name);
 
     const hexChecksum = web3.utils.bytesToHex(checksum);
 
@@ -89,6 +75,20 @@ export class UserFilesMetadataService {
     console.log("receipt", receipt);
   }
 
+  async deleteFileMetadata(userId: string, key: string) {
+    const bytesUserIdHashed = await this.hashUserId(userId);
+    const encryptedKeyHex = await this.createEncryptedHex(key);
+
+    const receipt = await fileMetadataRegistryContract.methods
+      .deleteUserFileByKey(bytesUserIdHashed, encryptedKeyHex)
+      .send({
+        from: web3.eth.defaultAccount,
+        gas: "1000000",
+        gasPrice: "1000000000000",
+      });
+
+    console.log("receipt", receipt);
+  }
   private async parseFileMetadata(file: any) {
     return {
       key: this.textDecoder.decode(
@@ -105,5 +105,10 @@ export class UserFilesMetadataService {
 
   private async hashUserId(userId: string) {
     return await hashHex(userId, "SHA-256");
+  }
+  private async createEncryptedHex(value: string) {
+    return web3.utils.bytesToHex(
+      await encrypt(stringToUint8Array(value), this.encryptionKey)
+    );
   }
 }

@@ -66,7 +66,28 @@ describe("FileMetadataRegistry", function () {
     });
   });
 
-  describe("deleteUserFileAt", function () {
+  describe("getFileByKey", function () {
+    it("Should return the right metadata", async function () {
+      const { fileMetadataRegistry, owner } = await loadFixture(
+        deployFileMetadataRegistryFixture
+      );
+
+      const fileChecksum = "0x1234567890abcdefffff";
+      const fileName = "file.txt";
+      const userId = ethers.encodeBytes32String("0x456");
+      const size = 100;
+      const key = "storageKey";
+
+      await fileMetadataRegistry
+        .connect(owner)
+        .registerFile(key, fileChecksum, fileName, size, userId);
+
+      const metadata = await fileMetadataRegistry.getFileByKey(userId, key);
+      expect(metadata.checksum).to.equal(fileChecksum);
+    });
+  });
+
+  describe("deleteUserFileByKey", function () {
     it("Should delete the file at the right index", async function () {
       const { fileMetadataRegistry, owner } = await loadFixture(
         deployFileMetadataRegistryFixture
@@ -82,30 +103,9 @@ describe("FileMetadataRegistry", function () {
         .connect(owner)
         .registerFile(key, fileChecksum, fileName, size, userId);
 
-      await fileMetadataRegistry.connect(owner).deleteUserFileAt(userId, 0);
-
-      const metadata = await fileMetadataRegistry.getFilesByUser(userId);
-      expect(metadata.length).to.equal(0);
-    });
-  });
-
-  describe("deleteAllUserFiles", function () {
-    it("Should delete the file", async function () {
-      const { fileMetadataRegistry, owner } = await loadFixture(
-        deployFileMetadataRegistryFixture
-      );
-
-      const fileChecksum = "0x1234567890abcdefffff";
-      const fileName = "file.txt";
-      const userId = ethers.encodeBytes32String("0x456");
-      const size = 100;
-      const key = "storageKey";
-
       await fileMetadataRegistry
         .connect(owner)
-        .registerFile(key, fileChecksum, fileName, size, userId);
-
-      await fileMetadataRegistry.connect(owner).deleteAllUserFiles(userId);
+        .deleteUserFileByKey(userId, key);
 
       const metadata = await fileMetadataRegistry.getFilesByUser(userId);
       expect(metadata.length).to.equal(0);
