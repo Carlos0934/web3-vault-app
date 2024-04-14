@@ -15,7 +15,7 @@ class _LoginFormState extends State<LoginForm> {
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final AuthService _authService = AuthService();
-
+  var _isSubmitting = false;
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -27,49 +27,101 @@ class _LoginFormState extends State<LoginForm> {
             children: [
               TextFormField(
                 controller: _emailController,
-                decoration: InputDecoration(
-                  labelText: 'Correo electrónico',
-                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor, ingrese un correo electrónico.';
+                  }
+                  if (!value.contains('@')) {
+                    return 'Por favor, ingrese un correo electrónico válido.';
+                  }
+
+                  return null;
+                },
+                decoration: const InputDecoration(
+                    labelText: 'Correo electrónico',
+                    hintText: 'email@example.com',
+                    suffixIcon: Icon(Icons.email)),
               ),
               const SizedBox(height: 20.0),
               TextFormField(
                 controller: _passwordController,
                 obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Contraseña',
-                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor, ingrese una contraseña.';
+                  }
+                  if (value.length < 6) {
+                    return 'La contraseña debe tener al menos 6 caracteres.';
+                  }
+
+                  return null;
+                },
+                decoration: const InputDecoration(
+                    labelText: 'Contraseña',
+                    suffixIcon: Icon(Icons.lock_rounded)),
               ),
               const SizedBox(height: 50.0),
               TextButton(
-                onPressed: () {
-                  // pop up a dialog
-                  if (_formKey.currentState!.validate()) {
-                    _authService.login(
-                        _emailController.text, _passwordController.text);
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                            'Por favor, ingrese un correo electrónico y una contraseña válidos.'),
-                      ),
-                    );
-                  }
-                  /*
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => FilesPage()),
-                  );
-                  */
-                },
+                onPressed: _isSubmitting
+                    ? null
+                    : () async {
+                        // pop up a dialog
+                        if (_formKey.currentState!.validate() == false) {
+                          return;
+                        }
+
+                        setState(() {
+                          _isSubmitting = true;
+                        });
+                        try {
+                          await _authService.login(
+                              email: _emailController.text,
+                              password: _passwordController.text);
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => FilesPage()),
+                            (route) => false,
+                          );
+                        } catch (e) {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                title: const Text('Error'),
+                                content: Text(e.toString()),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text('Cerrar'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        } finally {
+                          setState(() {
+                            _isSubmitting = false;
+                          });
+                        }
+                      },
                 style: TextButton.styleFrom(
-                  backgroundColor: Colors.black,
+                  backgroundColor:
+                      _isSubmitting ? Colors.black87 : Colors.black,
                   minimumSize: Size(double.infinity, 50.0),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(5.0),
                   ),
                 ),
-                child: const Text('Iniciar sesión',
-                    style: TextStyle(color: Colors.white)),
+                child: _isSubmitting
+                    ? const CircularProgressIndicator(
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(Colors.white70),
+                      )
+                    : const Text('Iniciar sesión',
+                        style: TextStyle(color: Colors.white)),
               ),
               const SizedBox(height: 20.0),
               TextButton(

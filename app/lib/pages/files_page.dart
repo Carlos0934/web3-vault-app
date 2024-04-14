@@ -1,6 +1,10 @@
 import 'dart:io';
+import 'package:app/dtos/user_profile.dart';
+import 'package:app/pages/login_page.dart';
+import 'package:app/services/auth_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 class FilesPage extends StatefulWidget {
   const FilesPage({super.key});
@@ -11,7 +15,19 @@ class FilesPage extends StatefulWidget {
 
 class _FilesPageState extends State<FilesPage> {
   int _selectedIndex = 0;
+  Future<UserProfile?> _userProfile = Future.value(null);
+  final AuthService _authService = AuthService();
+
   final PageController _pageController = PageController();
+
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      _userProfile = _authService.getProfile();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,10 +43,36 @@ class _FilesPageState extends State<FilesPage> {
                 child: Center(
               child: Text('Files'),
             )),
-            Container(
-                child: Center(
-              child: Text('Profile'),
-            )),
+            FutureBuilder(
+              future: _userProfile,
+              builder: (context, AsyncSnapshot<UserProfile?> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Welcome, ${snapshot.data!.email}'),
+                      const SizedBox(height: 20.0),
+                      ElevatedButton(
+                        onPressed: () async {
+                          await _authService.signOut();
+                          Navigator.of(context).pushAndRemoveUntil(
+                              MaterialPageRoute(
+                                  builder: (context) => const LoginPage()),
+                              (route) => false);
+                        },
+                        child: const Text('Sign out'),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           ],
         ),
         bottomNavigationBar: BottomAppBar(
