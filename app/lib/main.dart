@@ -1,8 +1,9 @@
-import 'package:app/pages/login-page.dart';
-import 'package:app/pages/register-page.dart';
+import 'package:app/pages/login_page.dart';
 import 'package:flutter/material.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   runApp(const MyApp());
 }
 

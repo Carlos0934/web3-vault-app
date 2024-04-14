@@ -1,4 +1,4 @@
-import 'package:app/widgets/register-form.dart';
+import 'package:app/widgets/register_form.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 

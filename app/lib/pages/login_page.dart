@@ -1,4 +1,4 @@
-import 'package:app/widgets/login-form.dart';
+import 'package:app/widgets/login_form.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatelessWidget {
