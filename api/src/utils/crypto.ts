@@ -48,21 +48,14 @@ export async function decrypt(
   return new Uint8Array(decryptedBuffer);
 }
 
-export async function arrayBufferToHex(buffer: ArrayBuffer): Promise<string> {
-  const bytes = new Uint8Array(buffer);
-  const hex = bytes.reduce(
-    (str, byte) => str + byte.toString(16).padStart(2, "0"),
-    ""
-  );
-  return "0x" + hex;
-}
-
-export function stringToArrayBuffer(str: string): ArrayBuffer {
+export function stringToUint8Array(str: string): Uint8Array {
   const encoder = new TextEncoder();
-  return encoder.encode(str).buffer;
+  return encoder.encode(str);
 }
 
-export function arrayBufferToString(buffer: ArrayBuffer): string {
-  const decoder = new TextDecoder();
-  return decoder.decode(buffer);
+export async function getChecksum(file: File): Promise<Uint8Array> {
+  const buffer = await file.arrayBuffer();
+  const bytes = new Uint8Array(buffer);
+  const checksum = await crypto.subtle.digest("SHA-256", bytes);
+  return new Uint8Array(checksum);
 }

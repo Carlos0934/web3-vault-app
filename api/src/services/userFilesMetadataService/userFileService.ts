@@ -1,8 +1,9 @@
 import { fileMetadataRegistryContract, web3 } from "../../config/web3";
 import { UserRepository } from "../../repositories/userRepository";
 
-import { decrypt, encrypt, stringToArrayBuffer } from "../../utils/crypto";
+import { decrypt, encrypt, stringToUint8Array } from "../../utils/crypto";
 import { hashHex } from "../../utils/hash";
+import { RegisterFileMetadataInput } from "./types";
 
 export class UserFilesMetadataService {
   constructor(
@@ -35,34 +36,17 @@ export class UserFilesMetadataService {
     return filesMetadata;
   }
 
-  async registerFileMetadata(file: File, userId: string) {
+  async registerFileMetadata({
+    userId,
+    file,
+    key,
+    checksum,
+  }: RegisterFileMetadataInput) {
     const user = await this.userRepo.getById(userId);
 
     if (!user) {
       throw new Error("User not found");
     }
-
-    const { blockHash, transactionHash, blockNumber } =
-      await this.saveFileMetadata({ file, userId, key: file.name });
-  }
-
-  private async getChecksum(file: File) {
-    const buffer = await file.arrayBuffer();
-    const bytes = new Uint8Array(buffer);
-    const checksum = await crypto.subtle.digest("SHA-256", bytes);
-    return web3.utils.bytesToHex(new Uint8Array(checksum));
-  }
-
-  private async saveFileMetadata({
-    file,
-    userId,
-    key,
-  }: {
-    key: string;
-    userId: string;
-    file: File;
-  }) {
-    const checksum = await this.getChecksum(file);
 
     const size = file.size;
     const hashedUserId = await hashHex(userId, "SHA-256");
@@ -70,25 +54,23 @@ export class UserFilesMetadataService {
     // Encrypt key and filename before storing in the contract to protect user privacy and data
 
     const bytesKey = web3.utils.bytesToHex(
-      await encrypt(stringToArrayBuffer(key), this.encryptionKey)
+      await encrypt(stringToUint8Array(key), this.encryptionKey)
     );
 
     const bytesFilename = web3.utils.bytesToHex(
-      await encrypt(stringToArrayBuffer(file.name), this.encryptionKey)
+      await encrypt(stringToUint8Array(file.name), this.encryptionKey)
     );
 
+    const hexChecksum = web3.utils.bytesToHex(checksum);
+
     const receipt = await fileMetadataRegistryContract.methods
-      .registerFile(bytesKey, checksum, bytesFilename, size, hashedUserId)
+      .registerFile(bytesKey, hexChecksum, bytesFilename, size, hashedUserId)
       .send({
         from: web3.eth.defaultAccount,
         gas: "1000000",
         gasPrice: "1000000000000",
       });
 
-    return {
-      transactionHash: receipt.transactionHash,
-      blockHash: receipt.blockHash,
-      blockNumber: receipt.blockNumber,
-    };
+    console.log("receipt", receipt);
   }
 }

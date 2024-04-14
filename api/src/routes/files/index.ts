@@ -4,10 +4,13 @@ import { secrets } from "../../config/secrets";
 import { JwtPayload } from "../../services/authService/types";
 import { factoryCreateClass } from "../../utils/factory";
 import { UserFilesMetadataService } from "../../services/userFilesMetadataService/userFileService";
+import { FileService } from "../../services/fileService";
+import { getChecksum } from "../../utils/crypto";
 
 const filesRoutes = new Hono();
 
 const userFilesMetadataService = factoryCreateClass(UserFilesMetadataService);
+const fileService = factoryCreateClass(FileService);
 
 filesRoutes.get(
   "/",
@@ -36,7 +39,16 @@ filesRoutes.post(
 
     const file = formData.get("file") as File;
 
-    await userFilesMetadataService.registerFileMetadata(file, userId);
+    const filename = file.name;
+    const size = file.size;
+    const checksum = await getChecksum(file);
+    const key = await fileService.uploadFile(file);
+    await userFilesMetadataService.registerFileMetadata({
+      checksum,
+      key,
+      userId,
+      file: { name: filename, size },
+    });
 
     return c.json({ message: "File registered" }, 201);
   }
