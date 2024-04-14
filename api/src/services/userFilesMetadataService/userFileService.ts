@@ -1,12 +1,19 @@
 import { fileMetadataRegistryContract, web3 } from "../../config/web3";
 import { UserRepository } from "../../repositories/userRepository";
 import { UserTransactionFileRepository } from "../../repositories/userTransactionFilesRepository";
+import {
+  arrayBufferToHex,
+  decrypt,
+  encrypt,
+  stringToArrayBuffer,
+} from "../../utils/crypto";
 import { hashHex } from "../../utils/hash";
 
 export class UserFilesMetadataService {
   constructor(
     private readonly userTransactionFilesRepository: UserTransactionFileRepository,
-    private readonly userRepo: UserRepository
+    private readonly userRepo: UserRepository,
+    private readonly encryptionKey: string
   ) {}
 
   async findFilesMetadataByUserId(userId: string) {
@@ -16,15 +23,21 @@ export class UserFilesMetadataService {
       .getFilesByUser(bytesUserIdHashed)
       .call();
 
-    const filesMetadata = files.map((file: any) => ({
-      key: web3.utils.hexToAscii(file.key),
-      checksum: file.checksum,
-      name: file.name,
-      size: new Number(file.size),
-      userId: web3.utils.hexToAscii(file.userId),
-      timestamp: new Number(file.timestamp),
-    }));
-    console.log(filesMetadata);
+    const textDecoder = new TextDecoder();
+    const filesMetadata = await Promise.all(
+      files.map(async (file: any) => ({
+        key: textDecoder.decode(
+          await decrypt(web3.utils.hexToBytes(file.key), this.encryptionKey)
+        ),
+        checksum: file.checksum,
+        name: textDecoder.decode(
+          await decrypt(web3.utils.hexToBytes(file.name), this.encryptionKey)
+        ),
+        size: new Number(file.size),
+        timestamp: new Number(file.timestamp),
+      }))
+    );
+
     return filesMetadata;
   }
 
@@ -37,12 +50,6 @@ export class UserFilesMetadataService {
 
     const { blockHash, transactionHash, blockNumber } =
       await this.saveFileMetadata({ file, userId, key: file.name });
-    await this.saveTransactionFile({
-      userId,
-      transactionHash,
-      blockHash,
-      blockNumber,
-    });
   }
 
   private async getChecksum(file: File) {
@@ -74,10 +81,19 @@ export class UserFilesMetadataService {
 
     const size = file.size;
     const hashedUserId = await hashHex(userId, "SHA-256");
-    const bytesKey = web3.utils.asciiToHex(key);
+
+    // Encrypt key and filename before storing in the contract to protect user privacy and data
+
+    const bytesKey = web3.utils.bytesToHex(
+      await encrypt(stringToArrayBuffer(key), this.encryptionKey)
+    );
+
+    const bytesFilename = web3.utils.bytesToHex(
+      await encrypt(stringToArrayBuffer(file.name), this.encryptionKey)
+    );
 
     const receipt = await fileMetadataRegistryContract.methods
-      .registerFile(bytesKey, checksum, file.name, size, hashedUserId)
+      .registerFile(bytesKey, checksum, bytesFilename, size, hashedUserId)
       .send({
         from: web3.eth.defaultAccount,
         gas: "1000000",

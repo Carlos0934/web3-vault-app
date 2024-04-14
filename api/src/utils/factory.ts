@@ -21,7 +21,8 @@ const config = {
   [UserFilesMetadataService.name]: () => {
     return new UserFilesMetadataService(
       new UserTransactionFileRepository(db),
-      new UserRepository(db)
+      new UserRepository(db),
+      secrets.encryptionKey
     );
   },
   [UserTransactionFileRepository.name]: () => {

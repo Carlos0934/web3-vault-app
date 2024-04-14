@@ -38,7 +38,7 @@ filesRoutes.post(
 
     await userFilesMetadataService.registerFileMetadata(file, userId);
 
-    return c.status(201);
+    return c.json({ message: "File registered" }, 201);
   }
 );
 export default filesRoutes;

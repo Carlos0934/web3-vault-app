@@ -3,8 +3,7 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 
 import authRoutes from "./routes/auth";
-import { factoryCreateClass } from "./utils/factory";
-import { UserFilesMetadataService } from "./services/userFilesMetadataService/userFileService";
+
 import filesRoutes from "./routes/files";
 
 const app = new Hono();
