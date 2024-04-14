@@ -12,14 +12,45 @@ export const fileMetadataRegistryAbi = [
         type: "bytes32",
       },
     ],
+    name: "deleteAllUserFiles",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "userId",
+        type: "bytes32",
+      },
+      {
+        internalType: "uint256",
+        name: "index",
+        type: "uint256",
+      },
+    ],
+    name: "deleteUserFileAt",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "userId",
+        type: "bytes32",
+      },
+    ],
     name: "getFilesByUser",
     outputs: [
       {
         components: [
           {
-            internalType: "bytes32",
+            internalType: "string",
             name: "key",
-            type: "bytes32",
+            type: "string",
           },
           {
             internalType: "string",
@@ -71,9 +102,9 @@ export const fileMetadataRegistryAbi = [
   {
     inputs: [
       {
-        internalType: "bytes32",
+        internalType: "string",
         name: "key",
-        type: "bytes32",
+        type: "string",
       },
       {
         internalType: "string",
@@ -117,9 +148,9 @@ export const fileMetadataRegistryAbi = [
     name: "userFiles",
     outputs: [
       {
-        internalType: "bytes32",
+        internalType: "string",
         name: "key",
-        type: "bytes32",
+        type: "string",
       },
       {
         internalType: "string",
