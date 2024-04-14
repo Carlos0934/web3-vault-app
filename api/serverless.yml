@@ -42,7 +42,7 @@ provider:
 
 functions:
   api:
-    handler: dist/functions.handler
+    handler: dist/function.handler
     events:
       - http:
           path: "{proxy+}"
