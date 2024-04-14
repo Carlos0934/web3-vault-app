@@ -8,18 +8,6 @@ export const users = sqliteTable("users", {
   createdAt: integer("created_at").notNull(),
 });
 
-export const userTransactionFiles = sqliteTable("user_transactions", {
-  id: text("id").primaryKey().notNull(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  transactionHash: text("transaction_hash").notNull(),
-  blockHash: text("block_hash").notNull(),
-  blockNumber: blob("block_number", { mode: "bigint" }).notNull(),
-  createdAt: integer("created_at").notNull(),
-});
-
 export const schema = {
   users,
-  userTransactionFiles,
 };
