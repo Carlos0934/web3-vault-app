@@ -17,13 +17,12 @@ const config = {
 
   [FileService.name]: () => {
     return new FileService({
-      bucketName: "web3_vault",
+      bucket: secrets.bucketUrl,
       credentials: {
         accessKeyId: secrets.awsAccessKeyId,
         secretAccessKey: secrets.awsSecretAccessKey,
       },
-      encryptionKey: secrets.encryptionKey,
-      region: "us-east-1",
+      region: secrets.awsRegion,
     });
   },
   [UserFilesMetadataService.name]: () => {

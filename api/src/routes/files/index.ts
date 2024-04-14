@@ -28,6 +28,23 @@ filesRoutes.get(
   }
 );
 
+filesRoutes.get(
+  "/:key",
+  jwt({
+    secret: secrets.jwtSecret,
+  }),
+  async (c) => {
+    const { userId } = c.get("jwtPayload") as JwtPayload;
+    const key = c.req.param("key");
+
+    const presignedUrl = await fileService.getPresignedUrl(key);
+    const file = await userFilesMetadataService.findFileMetadataByUserIdAndKey(
+      userId,
+      key
+    );
+    return c.json({ file, presignedUrl });
+  }
+);
 filesRoutes.post(
   "/",
   jwt({

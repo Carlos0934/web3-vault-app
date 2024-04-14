@@ -6,6 +6,7 @@ import { hashHex } from "../../utils/hash";
 import { RegisterFileMetadataInput } from "./types";
 
 export class UserFilesMetadataService {
+  private readonly textDecoder = new TextDecoder();
   constructor(
     private readonly userRepo: UserRepository,
     private readonly encryptionKey: string
@@ -18,22 +19,36 @@ export class UserFilesMetadataService {
       .getFilesByUser(bytesUserIdHashed)
       .call();
 
-    const textDecoder = new TextDecoder();
     const filesMetadata = await Promise.all(
-      files.map(async (file: any) => ({
-        key: textDecoder.decode(
-          await decrypt(web3.utils.hexToBytes(file.key), this.encryptionKey)
-        ),
-        checksum: file.checksum,
-        name: textDecoder.decode(
-          await decrypt(web3.utils.hexToBytes(file.name), this.encryptionKey)
-        ),
-        size: new Number(file.size),
-        timestamp: new Number(file.timestamp),
-      }))
+      files.map(this.parseFileMetadata.bind(this))
     );
 
     return filesMetadata;
+  }
+
+  async findFileMetadataByUserIdAndKey(userId: string, key: string) {
+    const bytesUserIdHashed = this.hashUserId(userId);
+
+    const files = await fileMetadataRegistryContract.methods
+      .getFilesByUser(bytesUserIdHashed, key)
+      .call();
+
+    if (!files || files.length === 0) {
+      throw new Error("File not found");
+    }
+
+    const decryptedKey = this.textDecoder.decode(
+      await decrypt(web3.utils.hexToBytes(files[0].key), this.encryptionKey)
+    );
+    const index = files.findIndex((file: any) => decryptedKey === file.key);
+
+    if (index === -1) {
+      throw new Error("File not found");
+    }
+
+    const fileMetadata = await this.parseFileMetadata(files[index]);
+
+    return fileMetadata;
   }
 
   async registerFileMetadata({
@@ -49,7 +64,7 @@ export class UserFilesMetadataService {
     }
 
     const size = file.size;
-    const hashedUserId = await hashHex(userId, "SHA-256");
+    const hashedUserId = this.hashUserId(userId);
 
     // Encrypt key and filename before storing in the contract to protect user privacy and data
 
@@ -72,5 +87,23 @@ export class UserFilesMetadataService {
       });
 
     console.log("receipt", receipt);
+  }
+
+  private async parseFileMetadata(file: any) {
+    return {
+      key: this.textDecoder.decode(
+        await decrypt(web3.utils.hexToBytes(file.key), this.encryptionKey)
+      ),
+      checksum: file.checksum,
+      name: this.textDecoder.decode(
+        await decrypt(web3.utils.hexToBytes(file.name), this.encryptionKey)
+      ),
+      size: new Number(file.size),
+      timestamp: new Number(file.timestamp),
+    };
+  }
+
+  private async hashUserId(userId: string) {
+    return await hashHex(userId, "SHA-256");
   }
 }
