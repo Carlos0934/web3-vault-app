@@ -1,0 +1,51 @@
+service: web3-vault-api
+useDotenv: true
+
+
+package:
+  patterns:
+    - '!src/**'
+    - '!node_modules/**'
+    - '!migrations/**'
+    - '!drizzle.config.ts'
+  
+
+
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-2
+  memorySize: 512
+  timeout: 30
+  architecture: arm64
+  environment:
+    DATABASE_URL: ${env:DATABASE_URL}
+    DATABASE_AUTH_TOKEN: ${env:DATABASE_AUTH_TOKEN}
+    JWT_SECRET: ${env:JWT_SECRET}
+    ENCRYPTION_KEY: ${env:ENCRYPTION_KEY}
+    FILE_METADATA_REGISTRY_ADDRESS: ${env:FILE_METADATA_REGISTRY_ADDRESS}
+    RPC_PROVIDER_URL: ${env:RPC_PROVIDER_URL}
+    ACCOUNT_PRIVATE_KEY: ${env:ACCOUNT_PRIVATE_KEY}
+    BUCKET_NAME: ${env:BUCKET_NAME}
+   
+
+  iam:
+      role:
+        name: lambda-web3-vault-${opt:stage}-role
+        statements:
+          - Effect: "Allow"
+            Action:
+              - "s3:*"
+            Resource: arn:aws:s3:::web-3-vault
+
+
+functions:
+  api:
+    handler: dist/api.handler
+    events:
+      - http:
+          path: "{proxy+}"
+          method: ANY
+
+

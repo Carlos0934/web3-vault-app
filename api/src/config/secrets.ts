@@ -14,6 +14,6 @@ export const secrets = {
   encryptionKey: getEnv("ENCRYPTION_KEY"),
   awsAccessKeyId: getEnv("AWS_ACCESS_KEY_ID"),
   awsSecretAccessKey: getEnv("AWS_SECRET_ACCESS_KEY"),
-  bucketUrl: getEnv("BUCKET_URL"),
+  bucketName: getEnv("BUCKET_NAME"),
   awsRegion: getEnv("AWS_REGION"),
 };

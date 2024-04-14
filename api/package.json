@@ -7,7 +7,9 @@
     "dev": "tsx   watch ./src/index.ts ",
     "generate": "drizzle-kit generate:sqlite",
     "migrate": "drizzle-kit push:sqlite",
-    "test": "vitest"
+    "test": "vitest",
+    "build": "node esbuild.mjs",
+    "deploy:prod": "serverless deploy --stage prod"
   },
   "keywords": [],
   "author": "",
@@ -17,6 +19,7 @@
     "@types/node": "^20.12.7",
     "dotenv": "^16.4.5",
     "drizzle-kit": "^0.20.14",
+    "esbuild": "^0.20.2",
     "tsx": "^4.7.2",
     "vitest": "^1.5.0"
   },
@@ -27,7 +30,6 @@
     "@hono/node-server": "^1.10.0",
     "@hono/zod-validator": "^0.2.1",
     "@libsql/client": "^0.6.0",
-    "bcrypt": "^5.1.1",
     "drizzle-orm": "^0.30.8",
     "hono": "^4.2.3",
     "web3": "^4.7.0",

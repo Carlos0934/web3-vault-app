@@ -7,7 +7,7 @@ import {
   RegisterUserOutput,
 } from "./types";
 import * as jwt from "hono/jwt";
-import bcrypt from "bcrypt";
+import { verifyPassword, hashPassword } from "../../utils/crypto";
 
 export class AuthService {
   constructor(
@@ -22,7 +22,7 @@ export class AuthService {
       throw new Error("Invalid email or password");
     }
 
-    if (!this.comparePassword(input.password, user.password)) {
+    if (!(await verifyPassword(input.password, user.password))) {
       throw new Error("Invalid email or password");
     }
 
@@ -40,7 +40,7 @@ export class AuthService {
 
     const { id } = await this.userRepository.create({
       ...input,
-      password: this.hashPassword(input.password),
+      password: await hashPassword(input.password),
     });
 
     return { id };
@@ -66,13 +66,5 @@ export class AuthService {
     const token = await jwt.sign({ userId, exp: exp }, this.secret);
 
     return token;
-  }
-
-  private hashPassword(password: string): string {
-    return bcrypt.hashSync(password, 10);
-  }
-
-  private comparePassword(password: string, hash: string): boolean {
-    return bcrypt.compareSync(password, hash);
   }
 }

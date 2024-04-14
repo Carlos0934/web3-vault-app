@@ -1,0 +1,55 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api-deployment:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "20.x"
+
+      - name: Install dependencies
+        working-directory: ./api
+        run: npm ci
+
+      - name: Build
+        working-directory: ./api
+        run: npm run build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: GitHub
+
+      - name: Deploy
+        working-directory: ./api
+        run: npm run deploy:prod
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_AUTH_TOKEN: ${{ secrets.DATABASE_AUTH_TOKEN }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
+          ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+          FILE_METADATA_REGISTRY_ADDRESS: ${{ secrets.FILE_METADATA_REGISTRY_ADDRESS }}
+          RPC_PROVIDER_URL: ${{ secrets.RPC_PROVIDER_URL }}
+          ACCOUNT_PRIVATE_KEY: ${{ secrets.ACCOUNT_PRIVATE_KEY }}

@@ -17,7 +17,7 @@ const config = {
 
   [FileService.name]: () => {
     return new FileService({
-      bucket: secrets.bucketUrl,
+      bucket: secrets.bucketName,
       credentials: {
         accessKeyId: secrets.awsAccessKeyId,
         secretAccessKey: secrets.awsSecretAccessKey,

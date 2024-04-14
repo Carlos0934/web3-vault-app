@@ -2,7 +2,7 @@ import { fileMetadataRegistryContract, web3 } from "../../config/web3";
 import { UserRepository } from "../../repositories/userRepository";
 
 import { decrypt, encrypt, stringToUint8Array } from "../../utils/crypto";
-import { hashHex } from "../../utils/hash";
+import { hashHex } from "../../utils/crypto";
 import { RegisterFileMetadataInput } from "./types";
 
 export class UserFilesMetadataService {
