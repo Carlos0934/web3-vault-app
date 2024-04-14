@@ -38,7 +38,7 @@ filesRoutes.get(
     const key = c.req.param("key");
 
     const presignedUrl = await fileService.getPresignedUrl(key);
-    const file = await userFilesMetadataService.findFileMetadataByUserIdAndKey(
+    const file = await userFilesMetadataService.getFileMetadataByUserIdAndKey(
       userId,
       key
     );
@@ -59,8 +59,7 @@ filesRoutes.post(
     const filename = file.name;
     const size = file.size;
     const checksum = await getChecksum(file);
-    //const key = await fileService.uploadFile(file);
-    const key = crypto.randomUUID();
+    const key = await fileService.uploadFile(file);
     await userFilesMetadataService.registerFileMetadata({
       checksum,
       key,

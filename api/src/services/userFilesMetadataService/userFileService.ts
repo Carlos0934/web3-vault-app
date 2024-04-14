@@ -26,17 +26,13 @@ export class UserFilesMetadataService {
     return filesMetadata;
   }
 
-  async findFileMetadataByUserIdAndKey(userId: string, key: string) {
-    const bytesUserIdHashed = await this.hashUserId(userId);
-    const encryptedKey = web3.utils.bytesToHex(
-      await encrypt(stringToUint8Array(key), this.encryptionKey)
-    );
+  async getFileMetadataByUserIdAndKey(userId: string, key: string) {
+    const filesMetadata = await this.findFilesMetadataByUserId(userId);
+    const fileMetadata = filesMetadata.find((file) => file.key === key);
 
-    const file = await fileMetadataRegistryContract.methods
-      .getFileByKey(bytesUserIdHashed, encryptedKey)
-      .call();
-
-    const fileMetadata = await this.parseFileMetadata(file);
+    if (!fileMetadata) {
+      throw new Error("File not found");
+    }
 
     return fileMetadata;
   }
@@ -77,10 +73,30 @@ export class UserFilesMetadataService {
 
   async deleteFileMetadata(userId: string, key: string) {
     const bytesUserIdHashed = await this.hashUserId(userId);
-    const encryptedKeyHex = await this.createEncryptedHex(key);
+
+    const files = await fileMetadataRegistryContract.methods
+      .getFilesByUser(bytesUserIdHashed)
+      .call();
+
+    let encryptedKey: string | null = null;
+    // Find the encrypted key that matches the key
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const decryptedKey = this.textDecoder.decode(
+        await decrypt(web3.utils.hexToBytes(file.key), this.encryptionKey)
+      );
+      if (decryptedKey === key) {
+        encryptedKey = file.key;
+        break;
+      }
+    }
+
+    if (!encryptedKey) {
+      throw new Error("File not found");
+    }
 
     const receipt = await fileMetadataRegistryContract.methods
-      .deleteUserFileByKey(bytesUserIdHashed, encryptedKeyHex)
+      .deleteUserFileByKey(bytesUserIdHashed, encryptedKey)
       .send({
         from: web3.eth.defaultAccount,
         gas: "1000000",
