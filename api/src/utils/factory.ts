@@ -1,7 +1,7 @@
 import db from "../config/db";
 import { secrets } from "../config/secrets";
 import { UserRepository } from "../repositories/userRepository";
-import { UserTransactionFileRepository } from "../repositories/userTransactionFilesRepository";
+
 import { AuthService } from "../services/authService";
 import { FileService } from "../services/fileService";
 import { UserFilesMetadataService } from "../services/userFilesMetadataService/userFileService";
@@ -16,17 +16,21 @@ const config = {
   },
 
   [FileService.name]: () => {
-    return new FileService(secrets.encryptionKey, "files");
+    return new FileService({
+      bucketName: "web3_vault",
+      credentials: {
+        accessKeyId: secrets.awsAccessKeyId,
+        secretAccessKey: secrets.awsSecretAccessKey,
+      },
+      encryptionKey: secrets.encryptionKey,
+      region: "us-east-1",
+    });
   },
   [UserFilesMetadataService.name]: () => {
     return new UserFilesMetadataService(
-      new UserTransactionFileRepository(db),
       new UserRepository(db),
       secrets.encryptionKey
     );
-  },
-  [UserTransactionFileRepository.name]: () => {
-    return new UserTransactionFileRepository(db);
   },
 };
 export function factoryCreateClass<T>(keyClass: new (...args: any) => T): T {

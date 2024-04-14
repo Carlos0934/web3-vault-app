@@ -1,4 +1,5 @@
 import {
+  DeleteObjectCommand,
   GetObjectCommand,
   PutObjectCommand,
   S3Client,
@@ -8,8 +9,15 @@ import { decrypt, encrypt } from "../../utils/crypto";
 export class FileService {
   private readonly s3 = new S3Client();
   constructor(
-    private readonly encryptionKey: string,
-    private readonly bucketName: string
+    private readonly config: {
+      encryptionKey: string;
+      region: string;
+      credentials: {
+        accessKeyId: string;
+        secretAccessKey: string;
+      };
+      bucketName: string;
+    }
   ) {}
 
   uploadFile(file: File): Promise<string> {
@@ -18,7 +26,10 @@ export class FileService {
     return new Promise((resolve, reject) => {
       reader.onload = async () => {
         const buffer = reader.result as ArrayBuffer;
-        const encryptedBuffer = await encrypt(buffer, this.encryptionKey);
+        const encryptedBuffer = await encrypt(
+          buffer,
+          this.config.encryptionKey
+        );
         const key = crypto.randomUUID();
 
         await this.uploadToS3(encryptedBuffer, key);
@@ -30,13 +41,13 @@ export class FileService {
 
   async downloadFile(key: string): Promise<File> {
     const buffer = await this.downloadFromS3(key);
-    const decryptedBuffer = await decrypt(buffer, this.encryptionKey);
+    const decryptedBuffer = await decrypt(buffer, this.config.encryptionKey);
     return new File([decryptedBuffer], key);
   }
 
   private async uploadToS3(buffer: ArrayBuffer, key: string) {
     const command = new PutObjectCommand({
-      Bucket: this.bucketName,
+      Bucket: this.config.bucketName,
       Key: key,
       Body: new Blob([buffer]),
     });
@@ -45,7 +56,7 @@ export class FileService {
 
   private async downloadFromS3(key: string): Promise<ArrayBuffer> {
     const command = new GetObjectCommand({
-      Bucket: this.bucketName,
+      Bucket: this.config.bucketName,
       Key: key,
     });
     const response = await this.s3.send(command);
@@ -62,5 +73,13 @@ export class FileService {
       chunks.push(value);
     }
     return new Blob(chunks).arrayBuffer();
+  }
+
+  async deleteFile(key: string) {
+    const command = new DeleteObjectCommand({
+      Bucket: this.config.bucketName,
+      Key: key,
+    });
+    await this.s3.send(command);
   }
 }

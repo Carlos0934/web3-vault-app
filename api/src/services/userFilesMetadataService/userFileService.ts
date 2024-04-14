@@ -1,17 +1,11 @@
 import { fileMetadataRegistryContract, web3 } from "../../config/web3";
 import { UserRepository } from "../../repositories/userRepository";
-import { UserTransactionFileRepository } from "../../repositories/userTransactionFilesRepository";
-import {
-  arrayBufferToHex,
-  decrypt,
-  encrypt,
-  stringToArrayBuffer,
-} from "../../utils/crypto";
+
+import { decrypt, encrypt, stringToArrayBuffer } from "../../utils/crypto";
 import { hashHex } from "../../utils/hash";
 
 export class UserFilesMetadataService {
   constructor(
-    private readonly userTransactionFilesRepository: UserTransactionFileRepository,
     private readonly userRepo: UserRepository,
     private readonly encryptionKey: string
   ) {}
@@ -57,15 +51,6 @@ export class UserFilesMetadataService {
     const bytes = new Uint8Array(buffer);
     const checksum = await crypto.subtle.digest("SHA-256", bytes);
     return web3.utils.bytesToHex(new Uint8Array(checksum));
-  }
-
-  private async saveTransactionFile(data: {
-    userId: string;
-    transactionHash: string;
-    blockHash: string;
-    blockNumber: bigint;
-  }) {
-    await this.userTransactionFilesRepository.create(data);
   }
 
   private async saveFileMetadata({
