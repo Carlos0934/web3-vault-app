@@ -79,7 +79,8 @@ class _LoginFormState extends State<LoginForm> {
                               password: _passwordController.text);
                           Navigator.pushAndRemoveUntil(
                             context,
-                            MaterialPageRoute(builder: (context) => HomePage()),
+                            MaterialPageRoute(
+                                builder: (context) => const HomePage()),
                             (route) => false,
                           );
                         } catch (e) {

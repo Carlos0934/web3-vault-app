@@ -17,9 +17,13 @@ class _RegisterFormState extends State<RegisterForm> {
   final _confirmPasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final AuthService _authService = AuthService();
+  var _isSubmitting = false;
   Future _register() async {
     try {
       if (!_formKey.currentState!.validate()) return;
+      setState(() {
+        _isSubmitting = true;
+      });
       await _authService.register(
           email: _emailController.text,
           phone: _phoneController.text,
@@ -45,6 +49,10 @@ class _RegisterFormState extends State<RegisterForm> {
           backgroundColor: Colors.red,
         ),
       );
+    } finally {
+      setState(() {
+        _isSubmitting = false;
+      });
     }
   }
 
@@ -149,16 +157,22 @@ class _RegisterFormState extends State<RegisterForm> {
               ),
               const SizedBox(height: 50.0),
               TextButton(
-                onPressed: _register,
+                onPressed: _isSubmitting ? null : _register,
                 style: TextButton.styleFrom(
-                  backgroundColor: Colors.black,
+                  backgroundColor:
+                      _isSubmitting ? Colors.black87 : Colors.black,
                   minimumSize: const Size(double.infinity, 50.0),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(5.0),
                   ),
                 ),
-                child: const Text('Registrarse',
-                    style: TextStyle(color: Colors.white)),
+                child: _isSubmitting
+                    ? const CircularProgressIndicator(
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(Colors.white70),
+                      )
+                    : const Text('Registrarse',
+                        style: TextStyle(color: Colors.white)),
               ),
               const SizedBox(height: 20.0),
               TextButton(

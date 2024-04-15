@@ -51,17 +51,20 @@ class FileService {
     final token = sharedPref.getString('token');
     final res = await dio.delete('/$key',
         options: Options(headers: {'Authorization': 'Bearer $token'}));
-
-    if (res.statusCode != 200) {
-      throw Exception('Error deleting file');
-    }
+    print(res.statusCode);
   }
 
-  Future<void> downloadFile(String key) async {
+  Future<void> downloadFile(FileMetadata file) async {
     final path = await _getDownloadDirectory();
+    final fileName = file.name;
+    if (File('$path$fileName').existsSync()) {
+      throw Exception('El archivo ya existe');
+    }
+
     final sharedPref = await SharedPreferences.getInstance();
+
     final token = sharedPref.getString('token');
-    final res = await dio.get('/$key',
+    final res = await dio.get('/${file.key}',
         options: Options(headers: {'Authorization': 'Bearer $token'}));
 
     if (res.statusCode != 200) {
@@ -69,11 +72,6 @@ class FileService {
     }
 
     final signedUrl = res.data['presignedUrl'];
-    final fileName = res.data['name'];
-
-    if (File('$path$fileName').existsSync()) {
-      throw Exception('El archivo ya existe');
-    }
 
     final downloadRes = await dio.download(signedUrl, '$path$fileName');
 

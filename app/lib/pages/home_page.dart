@@ -23,6 +23,7 @@ class _HomePageState extends State<HomePage> {
   final FileService _fileService = FileService();
   final AuthService _authService = AuthService();
   final PageController _pageController = PageController();
+
   @override
   initState() {
     super.initState();
@@ -36,7 +37,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Mis archivos'),
+          title: const Text('Web3 vault'),
         ),
         body: PageView(
           controller: _pageController,
@@ -85,7 +86,23 @@ class _HomePageState extends State<HomePage> {
             FilePickerResult? result = await FilePicker.platform.pickFiles();
 
             if (result != null) {
-              await _fileService.uploadFile(result.files.single.path!);
+              final uploadFileFuture =
+                  _fileService.uploadFile(result.files.single.path!);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Subiendo archivo...'),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+              await uploadFileFuture;
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Archivo subido correctamente'),
+                  behavior: SnackBarBehavior.floating,
+                  backgroundColor: Colors.green,
+                ),
+              );
               setState(() {
                 _fileMetadata = _fileService.listFiles();
               });

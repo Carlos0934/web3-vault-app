@@ -7,8 +7,12 @@ import 'package:intl/intl.dart';
 class MyFilesView extends StatefulWidget {
   final Future<List<FileMetadata>> filesMetadata;
   final VoidCallback onRefresh;
-  const MyFilesView(
-      {super.key, required this.filesMetadata, required this.onRefresh});
+
+  const MyFilesView({
+    super.key,
+    required this.filesMetadata,
+    required this.onRefresh,
+  });
 
   @override
   State<MyFilesView> createState() => _MyFilesViewState();
@@ -58,18 +62,30 @@ class _MyFilesViewState extends State<MyFilesView> {
                         color: Theme.of(context).primaryColor),
                     onPressed: () async {
                       try {
-                        await _fileService.downloadFile(file.key);
-
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text('Archivo descargado con éxito'),
+                            content: Text('Descargando archivo...'),
+                            behavior: SnackBarBehavior.floating,
                           ),
+                        );
+                        await _fileService.downloadFile(file);
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content: Text('Archivo descargado con éxito'),
+                              behavior: SnackBarBehavior.floating,
+                              backgroundColor: Colors.green,
+                              animation: AnimationController(
+                                vsync: Scaffold.of(context),
+                                duration: const Duration(milliseconds: 1500),
+                              )),
                         );
                       } catch (e) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(e.toString()),
                             behavior: SnackBarBehavior.floating,
+                            backgroundColor: Colors.red,
                           ),
                         );
                       }
@@ -80,7 +96,7 @@ class _MyFilesViewState extends State<MyFilesView> {
                     onPressed: () {
                       showDialog(
                         context: context,
-                        builder: (context) {
+                        builder: (dialogContext) {
                           return AlertDialog(
                             title: const Text('Eliminar archivo'),
                             content: const Text(
@@ -88,17 +104,49 @@ class _MyFilesViewState extends State<MyFilesView> {
                             actions: [
                               TextButton(
                                 onPressed: () {
-                                  Navigator.of(context).pop();
+                                  Navigator.of(dialogContext).pop();
                                 },
                                 child: const Text('Cancelar'),
                               ),
                               TextButton(
                                 onPressed: () async {
-                                  await _fileService.deleteFile(file.key);
+                                  try {
+                                    Navigator.of(dialogContext).pop();
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Eliminando archivo...'),
+                                        behavior: SnackBarBehavior.floating,
+                                      ),
+                                    );
+                                    print('Deleting file ${file.key}');
+                                    await _fileService.deleteFile(file.key);
+                                    ScaffoldMessenger.of(context)
+                                        .hideCurrentSnackBar();
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content:
+                                            Text('Archivo eliminado con éxito'),
+                                        behavior: SnackBarBehavior.floating,
+                                        backgroundColor: Colors.green,
+                                        animation: AnimationController(
+                                          vsync: Scaffold.of(context),
+                                          duration: const Duration(
+                                              milliseconds: 1500),
+                                        ),
+                                      ),
+                                    );
 
-                                  widget.onRefresh();
-
-                                  Navigator.of(context).pop();
+                                    widget.onRefresh();
+                                  } catch (e) {
+                                    print(e);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(e.toString()),
+                                        backgroundColor: Colors.red,
+                                        behavior: SnackBarBehavior.floating,
+                                      ),
+                                    );
+                                  }
                                 },
                                 child: const Text('Eliminar'),
                               ),
