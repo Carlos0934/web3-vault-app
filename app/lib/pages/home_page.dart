@@ -37,7 +37,15 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Web3 vault'),
+          centerTitle: true,
+          title: Container(
+            margin: const EdgeInsets.only(top: 10.0),
+            child: const Text('Web3 vault',
+                style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 28.0,
+                    fontWeight: FontWeight.w600)),
+          ),
         ),
         body: PageView(
           controller: _pageController,
