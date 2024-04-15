@@ -42,7 +42,7 @@ filesRoutes.get(
       userId,
       key
     );
-    return c.json({ file, presignedUrl });
+    return c.json({ ...file, presignedUrl });
   }
 );
 filesRoutes.post(
