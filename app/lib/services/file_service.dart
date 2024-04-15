@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:app/config/constants.dart';
 import 'package:app/dtos/file_metadata.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,8 +8,7 @@ import 'package:path_provider/path_provider.dart';
 
 class FileService {
   final dio = Dio(BaseOptions(
-    baseUrl:
-        'https://5csrj3tta5.execute-api.us-east-2.amazonaws.com/prod/api/files',
+    baseUrl: '${Constants.apiUrl}files',
   ));
 
   Future<List<FileMetadata>> listFiles() async {

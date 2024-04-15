@@ -5,6 +5,8 @@ import 'package:app/utils/bytes_formatter_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
+import '../utils/phone_number_extensions.dart';
+
 class ProfileView extends StatefulWidget {
   final Future<UserProfile?> userProfile;
 

@@ -1,11 +1,11 @@
+import 'package:app/config/constants.dart';
 import 'package:app/dtos/user_profile.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
   final dio = Dio(BaseOptions(
-    baseUrl:
-        'https://5csrj3tta5.execute-api.us-east-2.amazonaws.com/prod/api/auth',
+    baseUrl: '${Constants.apiUrl}auth',
   ));
 
   Future login({required String email, required String password}) async {
