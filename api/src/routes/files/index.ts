@@ -6,6 +6,7 @@ import { factoryCreateClass } from "../../utils/factory";
 import { UserFilesMetadataService } from "../../services/userFilesMetadataService/userFileService";
 import { FileService } from "../../services/fileService";
 import { getChecksum } from "../../utils/crypto";
+import { bodyLimit } from "hono/body-limit";
 
 const filesRoutes = new Hono();
 
@@ -47,9 +48,11 @@ filesRoutes.get(
 );
 filesRoutes.post(
   "/",
+
   jwt({
     secret: secrets.jwtSecret,
   }),
+  bodyLimit({ maxSize: 10 * 1024 * 1024 }), // 10 MB
   async (c) => {
     const { userId } = c.get("jwtPayload") as JwtPayload;
     const formData = await c.req.formData();
@@ -86,4 +89,5 @@ filesRoutes.delete(
     return c.json({ message: "File deleted" });
   }
 );
+
 export default filesRoutes;
