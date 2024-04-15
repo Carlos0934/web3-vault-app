@@ -8,6 +8,7 @@ import {
 } from "./types";
 import * as jwt from "hono/jwt";
 import { verifyPassword, hashPassword } from "../../utils/crypto";
+import { EmailAlreadyExistsError, InvalidCredentialsError } from "./errors";
 
 export class AuthService {
   constructor(
@@ -19,11 +20,11 @@ export class AuthService {
     const user = await this.userRepository.getByEmail(input.email);
 
     if (!user) {
-      throw new Error("Invalid email or password");
+      throw new InvalidCredentialsError();
     }
 
     if (!(await verifyPassword(input.password, user.password))) {
-      throw new Error("Invalid email or password");
+      throw new InvalidCredentialsError();
     }
 
     const token = await this.generateToken(user.id);
@@ -35,7 +36,7 @@ export class AuthService {
     const user = await this.userRepository.getByEmail(input.email);
 
     if (user) {
-      throw new Error("Email already exists");
+      throw new EmailAlreadyExistsError();
     }
 
     const { id } = await this.userRepository.create({

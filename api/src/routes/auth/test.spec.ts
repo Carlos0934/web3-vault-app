@@ -155,8 +155,36 @@ describe("authRoutes", () => {
 
     const body = await result.json();
 
-    expect(body).toStrictEqual({
-      error: "Invalid email or password",
+    expect(body).toStrictEqual({ error: "Invalid credentials" });
+  });
+
+  it("should fail to register with existing email", async () => {
+    // Arrange
+    const authService = factoryCreateClass(AuthService);
+
+    const user = {
+      email: "example@gmail.com",
+      fullName: "John Doe",
+      password: "password",
+      phone: "1234567890",
+    };
+
+    await authService.register(user);
+
+    // Act
+    const result = await authRoutes.request("/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(user),
     });
+
+    // Assert
+    expect(result.status).toBe(409);
+
+    const body = await result.json();
+
+    expect(body).toStrictEqual({ error: "Email already exists" });
   });
 });

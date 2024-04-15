@@ -9,6 +9,10 @@ import {
 } from "../../services/authService/schemas";
 import { secrets } from "../../config/secrets";
 import { JwtPayload } from "../../services/authService/types";
+import {
+  EmailAlreadyExistsError,
+  InvalidCredentialsError,
+} from "../../services/authService/errors";
 
 const authService = factoryCreateClass(AuthService);
 
@@ -24,8 +28,12 @@ authRoutes.post(
       const result = await authService.login(input);
       return ctx.json(result);
     } catch (error) {
-      if (error instanceof Error) {
+      if (error instanceof InvalidCredentialsError) {
         return ctx.json({ error: error.message }, 401);
+      }
+
+      if (error instanceof Error) {
+        return ctx.json({ error: error.message }, 400);
       }
     }
   }
@@ -41,6 +49,10 @@ authRoutes.post(
       const result = await authService.register(input);
       return ctx.json(result);
     } catch (error) {
+      if (error instanceof EmailAlreadyExistsError) {
+        return ctx.json({ error: error.message }, 409);
+      }
+
       if (error instanceof Error) {
         return ctx.json({ error: error.message }, 400);
       }
