@@ -20,6 +20,7 @@ describe("authRoutes", () => {
     const user = {
       email: "example@gmail.com",
       password: "password",
+      fullName: "John Doe",
       phone: "1234567890",
     };
     // Act
@@ -46,6 +47,7 @@ describe("authRoutes", () => {
     const authService = factoryCreateClass(AuthService);
     const user = {
       email: "example@gmail.com",
+      fullName: "John Doe",
       password: "password",
       phone: "1234567890",
     };
@@ -72,6 +74,7 @@ describe("authRoutes", () => {
 
     const user = {
       email: "example@gmail.com",
+      fullName: "John Doe",
       password: "password",
       phone: "1234567890",
     };
@@ -96,6 +99,7 @@ describe("authRoutes", () => {
     expect(result.status).toBe(200);
     expect(body).toStrictEqual({
       id,
+      fullName: user.fullName,
       email: user.email,
       phone: user.phone,
       createdAt: expect.any(Number),
@@ -108,6 +112,7 @@ describe("authRoutes", () => {
 
     const user = {
       email: "example@gmail.com",
+      fullName: "John Doe",
       password: "password",
       phone: "1234567890",
     };
@@ -129,6 +134,7 @@ describe("authRoutes", () => {
 
     const user = {
       email: "example@gmail.com",
+      fullName: "John Doe",
       password: "password",
       phone: "1234567890",
     };
