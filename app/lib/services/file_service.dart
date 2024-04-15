@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:app/dtos/file_metadata.dart';
 import 'package:dio/dio.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path_provider/path_provider.dart';
 
 class FileService {
   final dio = Dio(BaseOptions(
@@ -18,13 +22,11 @@ class FileService {
     if (res.statusCode != 200) {
       throw Exception('Error getting files');
     }
-    print(res.data);
 
     final files = res.data
         .map<FileMetadata>((file) => FileMetadata.fromJson(file))
         .toList();
-    await Future.delayed(Duration(seconds: 1));
-    print(files);
+
     return files;
   }
 
@@ -38,9 +40,58 @@ class FileService {
     final res = await dio.post('',
         data: formData,
         options: Options(headers: {'Authorization': 'Bearer $token'}));
-    print(res.statusCode);
+
     if (res.statusCode != 201) {
       throw Exception('Error uploading file');
     }
+  }
+
+  Future<void> deleteFile(String key) async {
+    // Simulate a network request
+    final sharedPref = await SharedPreferences.getInstance();
+    final token = sharedPref.getString('token');
+    final res = await dio.delete('/$key',
+        options: Options(headers: {'Authorization': 'Bearer $token'}));
+
+    if (res.statusCode != 200) {
+      throw Exception('Error deleting file');
+    }
+  }
+
+  Future<void> downloadFile(String key) async {
+    final path = await _getDownloadDirectory();
+    final sharedPref = await SharedPreferences.getInstance();
+    final token = sharedPref.getString('token');
+    final res = await dio.get('/$key',
+        options: Options(headers: {'Authorization': 'Bearer $token'}));
+
+    if (res.statusCode != 200) {
+      throw Exception('Error fetching signed URL');
+    }
+
+    final signedUrl = res.data['presignedUrl'];
+    final fileName = res.data['name'];
+
+    final downloadRes = await dio.download(signedUrl, '$path$fileName');
+
+    if (downloadRes.statusCode != 200) {
+      throw Exception('Error downloading file');
+    }
+  }
+
+  Future<String> _getDownloadDirectory() async {
+    Directory? dir;
+
+    try {
+      if (Platform.isIOS) {
+        dir = await getApplicationDocumentsDirectory(); // for iOS
+      } else {
+        dir = Directory('/storage/emulated/0/Download/'); // for android
+        if (!await dir.exists()) dir = (await getExternalStorageDirectory())!;
+      }
+    } catch (err) {
+      print("Cannot get download folder path $err");
+    }
+    return "${dir?.path}/";
   }
 }

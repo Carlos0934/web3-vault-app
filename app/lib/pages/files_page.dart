@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:app/dtos/file_metadata.dart';
 import 'package:app/dtos/user_profile.dart';
 import 'package:app/pages/login_page.dart';
@@ -7,8 +6,8 @@ import 'package:app/services/file_service.dart';
 import 'package:app/utils/bytes_formatter_extension.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class FilesPage extends StatefulWidget {
   const FilesPage({super.key});
@@ -69,8 +68,8 @@ class _FilesPageState extends State<FilesPage> {
                           children: [
                             Text('Size:${file.size.toHumanReadableFileSize()}'),
                             Text(_dateFormat.format(
-                              DateTime.fromMicrosecondsSinceEpoch(
-                                  file.createdAt),
+                              DateTime.fromMillisecondsSinceEpoch(
+                                  file.createdAt * 1000),
                             ))
                           ]),
                       trailing: Row(
@@ -80,11 +79,59 @@ class _FilesPageState extends State<FilesPage> {
                           IconButton(
                             icon: Icon(Icons.download,
                                 color: Theme.of(context).primaryColor),
-                            onPressed: () {},
+                            onPressed: () async {
+                              try {
+                                await _fileService.downloadFile(file.key);
+
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content:
+                                        Text('Archivo descargado con éxito'),
+                                  ),
+                                );
+                              } catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Error: $e'),
+                                  ),
+                                );
+                              }
+                            },
                           ),
                           IconButton(
                             icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () {},
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: const Text('Eliminar archivo'),
+                                    content: const Text(
+                                        '¿Estás seguro que deseas eliminar este archivo?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text('Cancelar'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () async {
+                                          await _fileService
+                                              .deleteFile(file.key);
+                                          setState(() {
+                                            _fileMetadata =
+                                                _fileService.listFiles();
+                                          });
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text('Eliminar'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
                           ),
                         ],
                       ),

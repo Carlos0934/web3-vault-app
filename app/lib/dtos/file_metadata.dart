@@ -18,7 +18,7 @@ class FileMetadata {
       size: json['size'],
       checksum: json['checksum'],
       key: json['key'],
-      createdAt: json['createdAt'],
+      createdAt: json['timestamp'],
     );
   }
 }
