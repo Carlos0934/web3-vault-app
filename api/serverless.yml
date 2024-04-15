@@ -29,7 +29,9 @@ provider:
     ACCOUNT_PRIVATE_KEY: ${env:ACCOUNT_PRIVATE_KEY}
     BUCKET_NAME: ${env:BUCKET_NAME}
    
-
+  apiGateway:
+    binaryMediaTypes:
+      - 'multipart/form-data'
   iam:
       role:
         name: lambda-web3-vault-${opt:stage}-role
@@ -47,5 +49,7 @@ functions:
       - http:
           path: "{proxy+}"
           method: ANY
+
+    
 
 
