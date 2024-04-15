@@ -3,39 +3,60 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  final _baseUrl =
-      'https://5csrj3tta5.execute-api.us-east-2.amazonaws.com/prod/api';
+  final dio = Dio(BaseOptions(
+    baseUrl:
+        'https://5csrj3tta5.execute-api.us-east-2.amazonaws.com/prod/api/auth',
+  ));
 
-  final dio = Dio();
+  Future login({required String email, required String password}) async {
+    try {
+      final response = await dio.post(
+        '/login',
+        data: {'email': email, 'password': password},
+      );
+      if (response.statusCode != 200) {
+        throw Exception('Error al iniciar sesión.');
+      }
 
-  Future<bool> login({required String email, required String password}) async {
-    final response = await dio.post(
-      '$_baseUrl/auth/login',
-      data: {'email': email, 'password': password},
-    );
-    if (response.statusCode == 200) {
       final token = response.data['token'];
-      print("Token: $token");
+
       final sharedPreferences = await SharedPreferences.getInstance();
 
       await sharedPreferences.setString('token', token);
-      print("Token: $token");
-      return true;
+    } catch (e) {
+      if (e is DioException) {
+        if (e.response?.statusCode == 401) {
+          throw Exception('Correo electrónico o contraseña incorrectos.');
+        }
+      }
+      throw Exception(e);
     }
-
-    if (response.statusCode == 401) {
-      throw Exception('Correo electrónico o contraseña incorrectos.');
-    }
-
-    return response.statusCode == 200;
   }
 
-  Future<bool> register(
-      {required String email, phone, required String password}) async {
-    final response = await dio.post('$_baseUrl/auth/register',
-        data: {'email': email, 'phone': phone, 'password': password});
+  Future register(
+      {required String email,
+      phone,
+      required String password,
+      required String fullName}) async {
+    try {
+      final response = await dio.post('/register', data: {
+        'email': email,
+        'phone': phone,
+        'password': password,
+        'fullName': fullName
+      });
+      if (response.statusCode != 201) {
+        throw Exception('Error registering user');
+      }
+    } catch (e) {
+      if (e is DioException) {
+        if (e.response?.statusCode == 409) {
+          throw Exception('El correo electrónico ya está en uso.');
+        }
 
-    return response.statusCode == 200;
+        throw Exception('Error al registrar usuario.');
+      }
+    }
   }
 
   Future<void> logout() async {
@@ -46,7 +67,7 @@ class AuthService {
     final sharedPreferences = await SharedPreferences.getInstance();
     final token = sharedPreferences.getString('token');
 
-    final response = await dio.get('$_baseUrl/auth/profile',
+    final response = await dio.get('/profile',
         options: Options(headers: {'Authorization': 'Bearer $token'}));
 
     if (response.statusCode == 401) {

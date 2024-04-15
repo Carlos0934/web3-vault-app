@@ -71,6 +71,10 @@ class FileService {
     final signedUrl = res.data['presignedUrl'];
     final fileName = res.data['name'];
 
+    if (File('$path$fileName').existsSync()) {
+      throw Exception('El archivo ya existe');
+    }
+
     final downloadRes = await dio.download(signedUrl, '$path$fileName');
 
     if (downloadRes.statusCode != 200) {

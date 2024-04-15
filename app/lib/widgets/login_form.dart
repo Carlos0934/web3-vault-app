@@ -1,4 +1,4 @@
-import 'package:app/pages/files_page.dart';
+import 'package:app/pages/home_page.dart';
 import 'package:app/pages/register_page.dart';
 import 'package:app/services/auth_service.dart';
 import 'package:flutter/material.dart';
@@ -79,8 +79,7 @@ class _LoginFormState extends State<LoginForm> {
                               password: _passwordController.text);
                           Navigator.pushAndRemoveUntil(
                             context,
-                            MaterialPageRoute(
-                                builder: (context) => FilesPage()),
+                            MaterialPageRoute(builder: (context) => HomePage()),
                             (route) => false,
                           );
                         } catch (e) {

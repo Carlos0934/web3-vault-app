@@ -10,12 +10,44 @@ class RegisterForm extends StatefulWidget {
 }
 
 class _RegisterFormState extends State<RegisterForm> {
+  final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final AuthService _authService = AuthService();
+  Future _register() async {
+    try {
+      if (!_formKey.currentState!.validate()) return;
+      await _authService.register(
+          email: _emailController.text,
+          phone: _phoneController.text,
+          password: _passwordController.text,
+          fullName: _fullNameController.text);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Te has registrado correctamente 🎉',
+              style: TextStyle(color: Colors.white)),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => LoginPage()),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString(), style: TextStyle(color: Colors.white)),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -25,6 +57,21 @@ class _RegisterFormState extends State<RegisterForm> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              TextFormField(
+                controller: _fullNameController,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor, ingrese su nombre completo.';
+                  }
+
+                  return null;
+                },
+                decoration: const InputDecoration(
+                  labelText: 'Nombre completo',
+                  hintText: 'Juan Pérez',
+                  suffixIcon: Icon(Icons.person),
+                ),
+              ),
               TextFormField(
                 controller: _emailController,
                 validator: (value) {
@@ -102,39 +149,7 @@ class _RegisterFormState extends State<RegisterForm> {
               ),
               const SizedBox(height: 50.0),
               TextButton(
-                onPressed: () async {
-                  // pop up a dialog
-                  if (!_formKey.currentState!.validate()) return;
-
-                  final isSuccess = await _authService.register(
-                      email: _emailController.text,
-                      phone: _phoneController.text,
-                      password: _passwordController.text);
-
-                  if (isSuccess) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Te has registrado correctamente 🎉',
-                            style: TextStyle(color: Colors.white)),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => LoginPage()),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                            'Ha ocurrido un error, por favor intenta de nuevo.',
-                            style: TextStyle(color: Colors.white)),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                },
+                onPressed: _register,
                 style: TextButton.styleFrom(
                   backgroundColor: Colors.black,
                   minimumSize: const Size(double.infinity, 50.0),
