@@ -21,10 +21,6 @@ export class FileService {
   ) {
     this.s3 = new S3Client({
       region: config.region,
-      credentials: {
-        accessKeyId: config.credentials.accessKeyId,
-        secretAccessKey: config.credentials.secretAccessKey,
-      },
     });
   }
 
