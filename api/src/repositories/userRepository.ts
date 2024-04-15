@@ -5,6 +5,7 @@ import { users } from "../config/schema";
 export class UserRepository {
   constructor(private readonly db: typeof database) {}
   async create(data: {
+    fullName: string;
     email: string;
     password: string;
     phone: string;
@@ -22,6 +23,7 @@ export class UserRepository {
 
   async getByEmail(email: string): Promise<{
     id: string;
+    fullName: string;
     email: string;
     password: string;
     phone: string;
@@ -39,6 +41,7 @@ export class UserRepository {
 
     return {
       id: user.id,
+      fullName: user.fullName,
       email: user.email,
       phone: user.phone,
       createdAt: user.createdAt,
@@ -48,6 +51,7 @@ export class UserRepository {
 
   async getById(id: string): Promise<{
     id: string;
+    fullName: string;
     email: string;
     password: string;
     phone: string;
@@ -65,6 +69,7 @@ export class UserRepository {
 
     return {
       id: user.id,
+      fullName: user.fullName,
       email: user.email,
       phone: user.phone,
       createdAt: user.createdAt,
