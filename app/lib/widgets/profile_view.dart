@@ -3,6 +3,7 @@ import 'package:app/pages/login_page.dart';
 import 'package:app/services/auth_service.dart';
 import 'package:app/utils/bytes_formatter_extension.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 class ProfileView extends StatefulWidget {
   final Future<UserProfile?> userProfile;
@@ -36,22 +37,67 @@ class _ProfileViewState extends State<ProfileView> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Bienvenido ${snapshot.data!.fullName}',
+                Image(
+                  image: NetworkImage(
+                      'https://ui-avatars.com/api/?rounded=true&name=${snapshot.data!.fullName}&size=128&background=0D8ABC&color=fff'),
+                  width: 96.0,
+                  height: 96.0,
+                ),
+                const SizedBox(height: 18.0),
+                Text(snapshot.data!.fullName,
                     style: const TextStyle(
-                      fontSize: 28.0,
-                      fontWeight: FontWeight.bold,
-                    )),
-                const SizedBox(height: 22.0),
-                Text(snapshot.data!.email,
-                    style: const TextStyle(
-                        fontSize: 22.0, fontWeight: FontWeight.w500)),
+                        fontSize: 24.0,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black)),
                 const SizedBox(height: 16.0),
-                Text(' ${snapshot.data!.phone.toHumanReadablePhoneNumber()}',
-                    style: const TextStyle(fontSize: 18.0)),
-                const SizedBox(height: 22.0),
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[50],
+                    borderRadius: BorderRadius.circular(5.0),
+                    border: Border.all(color: Colors.grey[200]!),
+                  ),
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.mail_outline,
+                        color: Colors.black,
+                      ),
+                      const SizedBox(width: 8.0),
+                      Text(snapshot.data!.email,
+                          style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black)),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16.0),
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[50],
+                    borderRadius: BorderRadius.circular(5.0),
+                    border: Border.all(color: Colors.grey[200]!),
+                  ),
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.phone,
+                        color: Colors.black,
+                      ),
+                      const SizedBox(width: 8.0),
+                      Text(
+                          ' ${snapshot.data!.phone.toHumanReadablePhoneNumber()}',
+                          style: const TextStyle(fontSize: 18.0)),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 50.0),
                 TextButton(
                   style: TextButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor,
                     minimumSize: const Size(double.infinity, 50.0),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(5.0),
@@ -66,7 +112,7 @@ class _ProfileViewState extends State<ProfileView> {
                   },
                   child: const Text('Cerrar sesión',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: Colors.red,
                         fontSize: 18.0,
                       )),
                 ),
