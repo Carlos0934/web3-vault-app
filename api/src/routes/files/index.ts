@@ -52,12 +52,19 @@ filesRoutes.post(
   jwt({
     secret: secrets.jwtSecret,
   }),
-  bodyLimit({ maxSize: 100 * 1024 * 1024 }), // 10 MB
+
   async (c) => {
     const { userId } = c.get("jwtPayload") as JwtPayload;
     const formData = await c.req.formData();
 
     const file = formData.get("file") as File;
+    if (!file) {
+      return c.json({ message: "File not found" }, 400);
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      return c.json({ message: "File too large" }, 400);
+    }
 
     const filename = file.name;
     const size = file.size;
