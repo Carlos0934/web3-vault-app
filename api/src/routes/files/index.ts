@@ -52,6 +52,7 @@ filesRoutes.post(
   jwt({
     secret: secrets.jwtSecret,
   }),
+  bodyLimit({ maxSize: 10 * 1024 * 1024 }), // 10 MB
   async (c) => {
     const { userId } = c.get("jwtPayload") as JwtPayload;
     const formData = await c.req.formData();
