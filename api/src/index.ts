@@ -9,7 +9,7 @@ import filesRoutes from "./routes/files";
 
 const app = new Hono();
 app.get("/health", async (c) => c.status(200));
-app.use(cors());
+//app.use(cors());
 
 app.route("/api/auth", authRoutes);
 app.route("/api/files", filesRoutes);
