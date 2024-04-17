@@ -17,7 +17,7 @@ provider:
   runtime: nodejs20.x
   region: us-east-2
   memorySize: 512
-  timeout: 300000 # 5 minutes
+  timeout: 30
   architecture: arm64
   environment:
     DATABASE_URL: ${env:DATABASE_URL}
@@ -42,6 +42,7 @@ provider:
 functions:
   api:
     handler: dist/function.handler
+    timeout: 300000 # 5 minutes
     events:
       - http:
           path: "{proxy+}"
