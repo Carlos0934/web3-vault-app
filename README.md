@@ -22,7 +22,7 @@ Web3 Vault is a mobile application that allows users to store their files on the
 
 - Store file metadata on the shimmer test network
 - Retrieve file metadata from the shimmer test network
-- Secure file storage using the S3
+- Secure file storage using the Iota testnet
 - Secure file metadata storage using the shimmer test network
 - User email/password authentication
 - Serverless API using AWS Lambda & API Gateway
@@ -38,11 +38,7 @@ Web3 Vault is a mobile application that allows users to store their files on the
 - TypeScript
 - Jwt
 - Vitest (Testing Framework)
-- Solidity
-- AWS S3
-- Shimmer Test Network
 - Drizzle (Lightweight ORM)
-- Web3.js
 - IOTA Testnet
 - AES Encryption
 - AWS Lambda & API Gateway
