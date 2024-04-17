@@ -21,9 +21,14 @@ provider:
     binaryMediaTypes:
       - 'multipart/form-data'
 
+  ecr:
+    images:
+        app:
+          path: .
+
 functions:
   api:
-    handler: dist/function.handler
+    image: app
     
     timeout: 300 # 5 minutes
     events:

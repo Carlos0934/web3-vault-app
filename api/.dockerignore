@@ -1,0 +1,5 @@
+node_modues
+dist
+serverless
+migrations
+.env
