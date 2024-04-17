@@ -29,10 +29,6 @@ jobs:
         working-directory: ./api
         run: npm install
 
-      - name: Build
-        working-directory: ./api
-        run: npm run build
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
