@@ -9,7 +9,6 @@ provider:
   runtime: nodejs20.x
   region: us-east-2
   memorySize: 512
-  architecture: arm64
   timeout: 30
   environment:
     DATABASE_URL: ${env:DATABASE_URL}
