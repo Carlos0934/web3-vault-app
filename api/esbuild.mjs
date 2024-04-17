@@ -7,8 +7,6 @@ await esbuild.build({
   platform: 'node',
   target: 'node20',
   entryPoints: ['./src/function.ts'],
-  loader: {
-    '.node': 'file'
-  },
+
   packages: 'external'
 })
