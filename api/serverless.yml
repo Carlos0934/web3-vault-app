@@ -42,7 +42,7 @@ provider:
 functions:
   api:
     handler: dist/function.handler
-    timeout: 300000 # 5 minutes
+    timeout: 300 # 5 minutes
     events:
       - http:
           path: "{proxy+}"
