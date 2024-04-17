@@ -31,7 +31,7 @@ authRoutes.post(
       if (error instanceof InvalidCredentialsError) {
         return ctx.json({ error: error.message }, 401);
       }
-
+      console.error(error);
       if (error instanceof Error) {
         return ctx.json({ error: error.message }, 400);
       }
