@@ -5,12 +5,9 @@ service: web3-vault-api
 package:
   patterns:
     - '!src/**'
-    - '!node_modules/**'
     - '!migrations/**'
     - '!drizzle.config.ts'
   
-
-
 
 provider:
   name: aws

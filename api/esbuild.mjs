@@ -2,7 +2,6 @@ import * as esbuild from 'esbuild'
 
 await esbuild.build({
   bundle: true,
-
   outdir: './dist',
   platform: 'node',
   target: 'node20',
@@ -10,5 +9,5 @@ await esbuild.build({
   loader: {
     '.node': 'file'
   },
-
+  packages: 'external'
 })
