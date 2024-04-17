@@ -5,7 +5,6 @@ useDotenv: true
 package:
   patterns:
     - '!src/**'
-    - '!node_modules/**'
     - '!migrations/**'
     - '!drizzle.config.ts'
   
