@@ -1,5 +1,9 @@
 service: web3-vault-api
+useDotenv: true
 
+plugins:
+  - serverless-offline
+  
 provider:
   name: aws
   runtime: nodejs20.x
