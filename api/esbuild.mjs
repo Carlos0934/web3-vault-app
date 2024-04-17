@@ -10,6 +10,5 @@ await esbuild.build({
   loader: {
     '.node': 'file'
   },
-packages: 'external'
 
 })

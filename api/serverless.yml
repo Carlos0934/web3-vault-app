@@ -1,10 +1,11 @@
 service: web3-vault-api
-useDotenv: true
+
 
 
 package:
   patterns:
     - '!src/**'
+    - '!node_modules/**'
     - '!migrations/**'
     - '!drizzle.config.ts'
   
