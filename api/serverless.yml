@@ -9,8 +9,8 @@ provider:
   runtime: nodejs20.x
   region: us-east-2
   memorySize: 512
-  timeout: 30
   architecture: arm64
+  timeout: 30
   environment:
     DATABASE_URL: ${env:DATABASE_URL}
     DATABASE_AUTH_TOKEN: ${env:DATABASE_AUTH_TOKEN}
@@ -21,19 +21,11 @@ provider:
   apiGateway:
     binaryMediaTypes:
       - 'multipart/form-data'
-  iam:
-      role:
-        name: lambda-web3-vault-${opt:stage}-role
-        statements:
-          - Effect: "Allow"
-            Action:
-              - "s3:*"
-            Resource: "*"
-
 
 functions:
   api:
     handler: dist/function.handler
+    
     timeout: 300 # 5 minutes
     events:
       - http:
