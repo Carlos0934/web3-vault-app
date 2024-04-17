@@ -8,5 +8,5 @@ await esbuild.build({
   platform: 'node',
   target: 'node20',
   entryPoints: ['./src/function.ts'],
-  external: ['aws-sdk']
+  external: ['aws-sdk','@iota/sdk']
 })

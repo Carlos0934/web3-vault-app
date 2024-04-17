@@ -3,15 +3,11 @@ import { jwt } from "hono/jwt";
 import { secrets } from "../../config/secrets";
 import { JwtPayload } from "../../services/authService/types";
 import { factoryCreateClass } from "../../utils/factory";
-import { UserFilesMetadataService } from "../../services/userFilesMetadataService/userFileService";
-import { FileService } from "../../services/fileService";
-import { getChecksum } from "../../utils/crypto";
-import { bodyLimit } from "hono/body-limit";
+import { IotaTangleService } from "../../services/tangleService";
 
 const filesRoutes = new Hono();
 
-const userFilesMetadataService = factoryCreateClass(UserFilesMetadataService);
-const fileService = factoryCreateClass(FileService);
+const iotaTangleService = factoryCreateClass(IotaTangleService);
 
 filesRoutes.get(
   "/",
@@ -21,9 +17,7 @@ filesRoutes.get(
   async (c) => {
     const { userId } = c.get("jwtPayload") as JwtPayload;
 
-    const files = await userFilesMetadataService.findFilesMetadataByUserId(
-      userId
-    );
+    const files = await iotaTangleService.getUserFiles(userId);
 
     return c.json(files);
   }
@@ -38,14 +32,29 @@ filesRoutes.get(
     const { userId } = c.get("jwtPayload") as JwtPayload;
     const key = c.req.param("key");
 
-    const presignedUrl = await fileService.getPresignedUrl(key);
-    const file = await userFilesMetadataService.getFileMetadataByUserIdAndKey(
+    const file = await iotaTangleService.getFile({
+      fileId: key,
       userId,
-      key
-    );
-    return c.json({ ...file, presignedUrl });
+    });
+
+    if (!file) {
+      return c.json({ message: "File not found" }, 404);
+    }
+
+    const acceptHeader = c.req.header("Accept");
+    if (acceptHeader === "application/json") {
+      return c.json(file);
+    }
+    const stream = await iotaTangleService.downloadFile(key);
+    return new Response(stream, {
+      headers: {
+        "Content-Length": file.size.toString(),
+        "Content-Disposition": `attachment; filename="${key}"`,
+      },
+    });
   }
 );
+
 filesRoutes.post(
   "/",
 
@@ -56,44 +65,20 @@ filesRoutes.post(
   async (c) => {
     const { userId } = c.get("jwtPayload") as JwtPayload;
     const formData = await c.req.formData();
+    const maxSize = 1024 * 500; // 500kb
 
     const file = formData.get("file") as File;
     if (!file) {
       return c.json({ message: "File not found" }, 400);
     }
 
-    if (file.size > 10 * 1024 * 1024) {
+    if (file.size > maxSize) {
       return c.json({ message: "File too large" }, 400);
     }
 
-    const filename = file.name;
-    const size = file.size;
-    const checksum = await getChecksum(file);
-    const key = await fileService.uploadFile(file);
-    await userFilesMetadataService.registerFileMetadata({
-      checksum,
-      key,
-      userId,
-      file: { name: filename, size },
-    });
+    await iotaTangleService.uploadFile(file, userId);
 
     return c.json({ message: "File registered" }, 201);
-  }
-);
-
-filesRoutes.delete(
-  "/:key",
-  jwt({
-    secret: secrets.jwtSecret,
-  }),
-  async (c) => {
-    const { userId } = c.get("jwtPayload") as JwtPayload;
-    const key = c.req.param("key");
-
-    //await fileService.deleteFile(key);
-    await userFilesMetadataService.deleteFileMetadata(userId, key);
-
-    return c.json({ message: "File deleted" });
   }
 );
 

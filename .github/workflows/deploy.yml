@@ -50,8 +50,5 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DATABASE_AUTH_TOKEN: ${{ secrets.DATABASE_AUTH_TOKEN }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
           ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
-          FILE_METADATA_REGISTRY_ADDRESS: ${{ secrets.FILE_METADATA_REGISTRY_ADDRESS }}
-          RPC_PROVIDER_URL: ${{ secrets.RPC_PROVIDER_URL }}
-          ACCOUNT_PRIVATE_KEY: ${{ secrets.ACCOUNT_PRIVATE_KEY }}
+          IOTA_NODES: ${{ secrets.IOTA_NODES }}

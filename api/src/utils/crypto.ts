@@ -1,7 +1,7 @@
 import { scrypt, timingSafeEqual, randomBytes } from "node:crypto";
 
 export async function encrypt(
-  buffer: ArrayBuffer,
+  buffer: Uint8Array,
   encryptionKey: string
 ): Promise<Uint8Array> {
   const iv = crypto.getRandomValues(new Uint8Array(16));
@@ -26,7 +26,7 @@ export async function encrypt(
 }
 
 export async function decrypt(
-  buffer: ArrayBuffer,
+  buffer: Uint8Array,
   encryptionKey: string
 ): Promise<Uint8Array> {
   const iv = new Uint8Array(buffer.slice(0, 16));
