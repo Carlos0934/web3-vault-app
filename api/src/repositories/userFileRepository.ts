@@ -8,18 +8,22 @@ export type UserFile = {
   size: number;
   userId: string;
   status: "pending" | "completed";
+  createdAt: number;
 };
 
 export class UserFileRepository {
   constructor(private readonly db: typeof database) {}
 
-  async create(data: Omit<UserFile, "id">): Promise<{ id: string }> {
+  async create(
+    data: Omit<UserFile, "id" | "createdAt">
+  ): Promise<{ id: string }> {
     const id = crypto.randomUUID();
 
     await this.db.insert(files).values({
       id,
       ...data,
       name: data.name,
+      createdAt: new Date(),
     });
 
     return { id };
@@ -42,6 +46,7 @@ export class UserFileRepository {
       size: file.size,
       userId: file.userId,
       status: file.status,
+      createdAt: file.createdAt.getTime(),
     };
   }
 
@@ -58,6 +63,7 @@ export class UserFileRepository {
       size: file.size,
       userId: file.userId,
       status: file.status,
+      createdAt: file.createdAt.getTime(),
     }));
   }
 
@@ -111,6 +117,7 @@ export class UserFileRepository {
       size: file.size,
       userId: file.userId,
       status: file.status,
+      createdAt: file.createdAt.getTime(),
     };
   }
 }

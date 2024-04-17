@@ -40,7 +40,7 @@ class _HomePageState extends State<HomePage> {
           centerTitle: true,
           title: Container(
             margin: const EdgeInsets.only(top: 10.0),
-            child: const Text('Web3 vault',
+            child: const Text('Iota Tangle Vault',
                 style: TextStyle(
                     color: Colors.black,
                     fontSize: 28.0,
@@ -102,6 +102,7 @@ class _HomePageState extends State<HomePage> {
                   behavior: SnackBarBehavior.floating,
                 ),
               );
+
               await uploadFileFuture;
               ScaffoldMessenger.of(context).hideCurrentSnackBar();
               ScaffoldMessenger.of(context).showSnackBar(

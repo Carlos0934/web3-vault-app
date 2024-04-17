@@ -1,24 +1,24 @@
 class FileMetadata {
+  final String id;
   final String name;
   final int size;
-  final String checksum;
-  final String key;
+  final String status;
   final int createdAt;
 
   FileMetadata(
-      {required this.name,
+      {required this.id,
+      required this.name,
       required this.size,
-      required this.checksum,
-      required this.key,
+      required this.status,
       required this.createdAt});
 
   factory FileMetadata.fromJson(Map<String, dynamic> json) {
     return FileMetadata(
+      id: json['id'],
       name: json['name'],
       size: json['size'],
-      checksum: json['checksum'],
-      key: json['key'],
-      createdAt: json['timestamp'],
+      status: json['status'],
+      createdAt: json['createdAt'],
     );
   }
 }

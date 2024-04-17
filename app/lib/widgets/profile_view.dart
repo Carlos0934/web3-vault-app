@@ -1,7 +1,6 @@
 import 'package:app/dtos/user_profile.dart';
 import 'package:app/pages/login_page.dart';
 import 'package:app/services/auth_service.dart';
-import 'package:app/utils/bytes_formatter_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 

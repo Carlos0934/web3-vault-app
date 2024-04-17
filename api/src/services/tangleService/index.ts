@@ -8,10 +8,6 @@ import {
   bytesToHex,
   Client,
   hexToBytes,
-  initLogger,
-  Payload,
-  PayloadType,
-  SecretManager,
   TaggedDataPayload,
   Utils,
 } from "@iota/sdk";

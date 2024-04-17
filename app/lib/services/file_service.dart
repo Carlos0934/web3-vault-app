@@ -38,20 +38,13 @@ class FileService {
     });
     final res = await dio.post('',
         data: formData,
-        options: Options(headers: {'Authorization': 'Bearer $token'}));
+        options: Options(headers: {
+          'Authorization': 'Bearer $token',
+        }));
 
     if (res.statusCode != 201) {
       throw Exception('Error uploading file');
     }
-  }
-
-  Future<void> deleteFile(String key) async {
-    // Simulate a network request
-    final sharedPref = await SharedPreferences.getInstance();
-    final token = sharedPref.getString('token');
-    final res = await dio.delete('/$key',
-        options: Options(headers: {'Authorization': 'Bearer $token'}));
-    print(res.statusCode);
   }
 
   Future<void> downloadFile(FileMetadata file) async {
@@ -64,18 +57,12 @@ class FileService {
     final sharedPref = await SharedPreferences.getInstance();
 
     final token = sharedPref.getString('token');
-    final res = await dio.get('/${file.key}',
-        options: Options(headers: {'Authorization': 'Bearer $token'}));
+    final res = await dio.download('/${file.id}', '$path$fileName',
+        options: Options(headers: {
+          'Authorization': 'Bearer $token',
+        }));
 
     if (res.statusCode != 200) {
-      throw Exception('Error fetching signed URL');
-    }
-
-    final signedUrl = res.data['presignedUrl'];
-
-    final downloadRes = await dio.download(signedUrl, '$path$fileName');
-
-    if (downloadRes.statusCode != 200) {
       throw Exception('Error downloading file');
     }
   }
