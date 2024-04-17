@@ -2,7 +2,6 @@ import "dotenv/config";
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 
-import { Block, Client, initLogger } from "@iota/sdk";
 import authRoutes from "./routes/auth";
 import filesRoutes from "./routes/files";
 

@@ -10,7 +10,8 @@
     "test": "vitest",
     "build": "node esbuild.mjs",
     "deploy:prod": "serverless deploy --stage prod",
-    "start": "node dist/function.js"
+    "start": "node --env-file=.env dist/function.js",
+    "prestart": "npm run build"
   },
   "keywords": [],
   "author": "",
