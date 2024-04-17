@@ -81,7 +81,7 @@ export class IotaTangleService {
       console.log("Completing file");
       await this.userFileRepository.updateStatus(fileId, "completed");
     };
-    file
+    await file
       .stream()
       .pipeThrough(splitBytesStream(chunkSize))
       .pipeThrough(encryptBytesStream(this.encryptionKey))
