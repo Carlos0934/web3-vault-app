@@ -28,7 +28,8 @@ provider:
 
 functions:
   api:
-    image: app
+    image: 
+      name: app
     
     timeout: 300 # 5 minutes
     events:

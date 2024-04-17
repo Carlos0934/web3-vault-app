@@ -1,5 +1,7 @@
-node_modues
+node_modules
 dist
+package-lock.json
+
 serverless
 migrations
 .env
