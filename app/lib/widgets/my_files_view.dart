@@ -37,6 +37,7 @@ class _MyFilesViewState extends State<MyFilesView> {
           return const Center(child: Text('No hay archivos disponibles'));
         }
         return ListView.builder(
+          scrollDirection: Axis.vertical,
           itemCount: snapshot.data!.length,
           itemBuilder: (context, index) {
             final file = snapshot.data![index];

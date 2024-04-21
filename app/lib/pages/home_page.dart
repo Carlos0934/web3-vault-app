@@ -102,19 +102,33 @@ class _HomePageState extends State<HomePage> {
                   behavior: SnackBarBehavior.floating,
                 ),
               );
+              try {
+                await Future.delayed(const Duration(milliseconds: 500));
+                setState(() {
+                  _fileMetadata = _fileService.listFiles();
+                });
+                await uploadFileFuture;
 
-              await uploadFileFuture;
-              ScaffoldMessenger.of(context).hideCurrentSnackBar();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Archivo subido correctamente'),
-                  behavior: SnackBarBehavior.floating,
-                  backgroundColor: Colors.green,
-                ),
-              );
-              setState(() {
-                _fileMetadata = _fileService.listFiles();
-              });
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Archivo subido correctamente'),
+                    behavior: SnackBarBehavior.floating,
+                    backgroundColor: Colors.green,
+                  ),
+                );
+                setState(() {
+                  _fileMetadata = _fileService.listFiles();
+                });
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(e.toString()),
+                    behavior: SnackBarBehavior.floating,
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
             } else {
               print('No file selected');
             }

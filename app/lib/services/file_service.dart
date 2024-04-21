@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:app/config/constants.dart';
@@ -36,13 +37,14 @@ class FileService {
     final formData = FormData.fromMap({
       'file': await MultipartFile.fromFile(path),
     });
-    final res = await dio.post('',
+    Response<ResponseBody> res = await dio.post('',
         data: formData,
         options: Options(headers: {
           'Authorization': 'Bearer $token',
-        }));
+          'Content-Type': 'multipart/form-data',
+        }, responseType: ResponseType.stream));
 
-    if (res.statusCode != 201) {
+    if (res.statusCode != 200) {
       throw Exception('Error uploading file');
     }
   }
