@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { stream } from "hono/streaming";
 import { jwt } from "hono/jwt";
 import { secrets } from "../../config/secrets";
 import { JwtPayload } from "../../services/authService/types";
@@ -76,9 +77,13 @@ filesRoutes.post(
       return c.json({ message: "File too large" }, 400);
     }
 
-    await iotaTangleService.uploadFile(file, userId);
-
-    return c.json({ message: "File registered" }, 201);
+    return stream(c, async (stream) => {
+      stream.write("0.00");
+      await iotaTangleService.uploadFile(file, userId, (progress) => {
+        console.log(`Progress: ${progress.toFixed(2)}`);
+        stream.write(progress.toFixed(2));
+      });
+    });
   }
 );
 

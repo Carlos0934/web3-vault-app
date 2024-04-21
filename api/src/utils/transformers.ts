@@ -10,13 +10,33 @@ export function encryptBytesStream(
   });
 }
 
-export function splitBytesStream(
+export function splitBytesByChunkStream(
   chunkSize: number
 ): TransformStream<Uint8Array, Uint8Array> {
+  let buffer = new Uint8Array(chunkSize);
+  let bufferIndex = 0;
+
   return new TransformStream({
     transform(chunk, controller) {
-      for (let i = 0; i < chunk.length; i += chunkSize) {
-        controller.enqueue(chunk.slice(i, i + chunkSize));
+      while (chunk.length > 0) {
+        const remainingSpace = buffer.length - bufferIndex;
+        const bytesToCopy = Math.min(remainingSpace, chunk.length);
+
+        buffer.set(chunk.slice(0, bytesToCopy), bufferIndex);
+        bufferIndex += bytesToCopy;
+
+        if (bufferIndex === buffer.length) {
+          controller.enqueue(buffer);
+          buffer = new Uint8Array(chunkSize);
+          bufferIndex = 0;
+        }
+
+        chunk = chunk.slice(bytesToCopy);
+      }
+    },
+    flush(controller) {
+      if (bufferIndex > 0) {
+        controller.enqueue(buffer.slice(0, bufferIndex));
       }
     },
   });

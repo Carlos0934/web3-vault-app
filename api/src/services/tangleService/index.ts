@@ -16,8 +16,9 @@ import { decrypt, encrypt, stringToUint8Array } from "../../utils/crypto";
 import {
   bytesToHexStream,
   encryptBytesStream,
-  splitBytesStream,
+  splitBytesByChunkStream,
 } from "../../utils/transformers";
+import { Console } from "node:console";
 export class IotaTangleService {
   private readonly client: Client;
 
@@ -41,8 +42,12 @@ export class IotaTangleService {
       }))
     );
   }
-  async uploadFile(file: File, userId: string): Promise<void> {
-    const chunkSize = 1024 * 30; // 30kb
+  async uploadFile(
+    file: File,
+    userId: string,
+    onProgress: (progress: number) => void
+  ) {
+    const chunkSize = 1024 * 5; // 5KB
 
     const tag = await encrypt(
       stringToUint8Array(file.name),
@@ -58,14 +63,12 @@ export class IotaTangleService {
       size: file.size,
       status: "pending",
     });
+
     const saveFileBlock = async (payload: string) => {
-      console.log("Saving block");
       const [blockHash] = await this.client.buildAndPostBlock(secretManager, {
         tag: bytesToHex(tag, true),
         data: payload,
       });
-
-      console.log("Block saved");
 
       await this.userFileRepository.addBlock({
         fileId,
@@ -73,21 +76,24 @@ export class IotaTangleService {
         timestamp: Date.now(),
       });
     };
-    const completeFile = async () => {
-      console.log("Completing file");
-      await this.userFileRepository.updateStatus(fileId, "completed");
-    };
+    const completeFile = async () =>
+      this.userFileRepository.updateStatus(fileId, "completed");
+
+    const totalBlocks = Math.ceil(file.size / chunkSize);
+    let currentBlock = 0;
     await file
       .stream()
-      .pipeThrough(splitBytesStream(chunkSize))
+      .pipeThrough(splitBytesByChunkStream(chunkSize))
       .pipeThrough(encryptBytesStream(this.encryptionKey))
       .pipeThrough(bytesToHexStream())
       .pipeTo(
         new WritableStream({
-          async write(chunk) {
+          write: async (chunk) => {
             await saveFileBlock(chunk);
+            currentBlock++;
+            onProgress(currentBlock / totalBlocks);
           },
-          async close() {
+          close: async () => {
             await completeFile();
           },
         })
@@ -102,7 +108,10 @@ export class IotaTangleService {
       encryptionKey: string
     ): AsyncGenerator<Uint8Array> {
       for (const { blockHash } of blocks) {
+        console.log("Getting block data of" + blockHash);
+
         const blockData = await getBlockData(blockHash);
+
         if (blockData.payload instanceof TaggedDataPayload) {
           const chunkBytes = hexToBytes(blockData.payload.data);
           const decryptedChunk = await decrypt(chunkBytes, encryptionKey);
@@ -110,24 +119,22 @@ export class IotaTangleService {
           yield decryptedChunk;
         }
       }
+      return;
     };
+    const generator = decryptBlocks(
+      (blockHash) => this.client.getBlock(blockHash),
+      this.encryptionKey
+    );
 
     return new ReadableStream<Uint8Array>({
       pull: async (controller) => {
-        const generator = decryptBlocks(
-          (blockHash) => this.client.getBlock(blockHash),
-          this.encryptionKey
-        );
         const { value, done } = await generator.next();
+
         if (done) {
           controller.close();
         } else {
           controller.enqueue(value);
         }
-      },
-
-      cancel() {
-        console.log("Stream cancelled");
       },
     });
   }
